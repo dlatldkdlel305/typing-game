@@ -1,0 +1,3147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>맛있는 음식 타자 연습 - 디즈니 음식 컬렉션</title>
+  <meta name="description" content="남녀노소 누구나 즐기는 맛있는 음식 한글 타자 연습 게임! 5단계 총 15가지 만화 음식 컬렉션을 완성해보세요." />
+
+  <!-- Google Fonts: Jua (친근한 둥근 헤드라인), Noto Sans KR (가독성 본문), Outfit (세련된 숫자/영문) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+            jua: ['Jua', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            amber: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+              950: '#451a03',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- React 18, ReactDOM 18 UMD -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel Standalone for in-browser JSX parsing without build tools -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Canvas Confetti for celebratory particle explosions -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Custom clean scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(254, 243, 199, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(217, 119, 6, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(217, 119, 6, 0.6);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #fefce8;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, button {
+      user-select: auto;
+      -webkit-user-select: auto;
+    }
+  </style>
+</head>
+<body class="bg-amber-50/40 text-amber-950 font-['Noto_Sans_KR',sans-serif]">
+  <div id="root"></div>
+
+  <!-- Standalone Application Code -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+    // ==========================================
+    // 1. INLINE SVG ICONS (Lucide Icon Replacements)
+    // ==========================================
+    const Icon = ({ children, className = "w-4 h-4", ...props }) => (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+      >
+        {children}
+      </svg>
+    );
+
+    const Trophy = (props) => (
+      <Icon {...props}>
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+      </Icon>
+    );
+
+    const Zap = (props) => (
+      <Icon {...props}>
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </Icon>
+    );
+
+    const X = (props) => (
+      <Icon {...props}>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </Icon>
+    );
+
+    const Check = (props) => (
+      <Icon {...props}>
+        <polyline points="20 6 9 17 4 12" />
+      </Icon>
+    );
+
+    const CheckCircle2 = (props) => (
+      <Icon {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="m9 12 2 2 4-4" />
+      </Icon>
+    );
+
+    const Download = (props) => (
+      <Icon {...props}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </Icon>
+    );
+
+    const Trash2 = (props) => (
+      <Icon {...props}>
+        <path d="M3 6h18" />
+        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+        <line x1="10" y1="11" x2="10" y2="17" />
+        <line x1="14" y1="11" x2="14" y2="17" />
+      </Icon>
+    );
+
+    const ShieldCheck = (props) => (
+      <Icon {...props}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <polyline points="9 12 11 14 15 10" />
+      </Icon>
+    );
+
+    const ShieldAlert = (props) => (
+      <Icon {...props}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </Icon>
+    );
+
+    const Award = (props) => (
+      <Icon {...props}>
+        <circle cx="12" cy="8" r="6" />
+        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+      </Icon>
+    );
+
+    const Calendar = (props) => (
+      <Icon {...props}>
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </Icon>
+    );
+
+    const Sparkles = (props) => (
+      <Icon {...props}>
+        <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+      </Icon>
+    );
+
+    const Volume2 = (props) => (
+      <Icon {...props}>
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      </Icon>
+    );
+
+    const VolumeX = (props) => (
+      <Icon {...props}>
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <line x1="23" y1="9" x2="17" y2="15" />
+        <line x1="17" y1="9" x2="23" y2="15" />
+      </Icon>
+    );
+
+    const RotateCcw = (props) => (
+      <Icon {...props}>
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </Icon>
+    );
+
+    const Music = (props) => (
+      <Icon {...props}>
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
+      </Icon>
+    );
+
+    const Music2 = (props) => (
+      <Icon {...props}>
+        <circle cx="8" cy="18" r="4" />
+        <path d="M12 18V2l7 4" />
+      </Icon>
+    );
+
+    const Target = (props) => (
+      <Icon {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" />
+      </Icon>
+    );
+
+    const CornerDownLeft = (props) => (
+      <Icon {...props}>
+        <polyline points="9 10 4 15 9 20" />
+        <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+      </Icon>
+    );
+
+    const AlertCircle = (props) => (
+      <Icon {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </Icon>
+    );
+
+    const ArrowRight = (props) => (
+      <Icon {...props}>
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+      </Icon>
+    );
+
+    const Utensils = (props) => (
+      <Icon {...props}>
+        <path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2" />
+        <path d="M15 11v11" />
+        <path d="M5 2v14a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V2" />
+        <path d="M8 2v6" />
+      </Icon>
+    );
+
+    const Clock = (props) => (
+      <Icon {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </Icon>
+    );
+
+    // ==========================================
+    // 2. HANGUL DECOMPOSITION & STROKE COUNTER
+    // ==========================================
+    const CHO_STROKES = [1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1];
+    const JUNG_STROKES = [1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 1];
+    const JONG_STROKES = [0, 1, 2, 2, 1, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1];
+
+    const SINGLE_JAMO_STROKES = {
+      'ㄱ': 1, 'ㄴ': 1, 'ㄷ': 1, 'ㄹ': 1, 'ㅁ': 1, 'ㅂ': 1, 'ㅅ': 1, 'ㅇ': 1, 'ㅈ': 1, 'ㅊ': 1, 'ㅋ': 1, 'ㅌ': 1, 'ㅍ': 1, 'ㅎ': 1,
+      'ㄲ': 2, 'ㄸ': 2, 'ㅃ': 2, 'ㅆ': 2, 'ㅉ': 2,
+      'ㄳ': 2, 'ㄵ': 2, 'ㄶ': 2, 'ㄺ': 2, 'ㄻ': 2, 'ㄼ': 2, 'ㄽ': 2, 'ㄾ': 2, 'ㄿ': 2, 'ㅀ': 2, 'ㅄ': 2,
+      'ㅏ': 1, 'ㅑ': 1, 'ㅓ': 1, 'ㅕ': 1, 'ㅗ': 1, 'ㅛ': 1, 'ㅜ': 1, 'ㅠ': 1, 'ㅡ': 1, 'ㅣ': 1, 'ㅐ': 1, 'ㅔ': 1,
+      'ㅒ': 2, 'ㅖ': 2, 'ㅘ': 2, 'ㅙ': 2, 'ㅚ': 2, 'ㅝ': 2, 'ㅞ': 2, 'ㅟ': 2, 'ㅢ': 2,
+    };
+
+    const CHO_CHARS = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+    const JUNG_CHARS = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
+    const JONG_CHARS = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+    const JUNG_DECOMP = {
+      'ㅏ': ['ㅏ'], 'ㅐ': ['ㅐ'], 'ㅑ': ['ㅑ'], 'ㅒ': ['ㅒ'], 'ㅓ': ['ㅓ'], 'ㅔ': ['ㅔ'], 'ㅕ': ['ㅕ'], 'ㅖ': ['ㅖ'],
+      'ㅗ': ['ㅗ'], 'ㅘ': ['ㅗ', 'ㅏ'], 'ㅙ': ['ㅗ', 'ㅐ'], 'ㅚ': ['ㅗ', 'ㅣ'], 'ㅛ': ['ㅛ'], 'ㅜ': ['ㅜ'],
+      'ㅝ': ['ㅜ', 'ㅓ'], 'ㅞ': ['ㅜ', 'ㅔ'], 'ㅟ': ['ㅜ', 'ㅣ'], 'ㅠ': ['ㅠ'], 'ㅡ': ['ㅡ'], 'ㅢ': ['ㅡ', 'ㅣ'], 'ㅣ': ['ㅣ'],
+    };
+
+    const JONG_DECOMP = {
+      '': [], 'ㄱ': ['ㄱ'], 'ㄲ': ['ㄲ'], 'ㄳ': ['ㄱ', 'ㅅ'], 'ㄴ': ['ㄴ'], 'ㄵ': ['ㄴ', 'ㅈ'], 'ㄶ': ['ㄴ', 'ㅎ'],
+      'ㄷ': ['ㄷ'], 'ㄹ': ['ㄹ'], 'ㄺ': ['ㄹ', 'ㄱ'], 'ㄻ': ['ㄹ', 'ㅁ'], 'ㄼ': ['ㄹ', 'ㅂ'], 'ㄽ': ['ㄹ', 'ㅅ'],
+      'ㄾ': ['ㄹ', 'ㅌ'], 'ㄿ': ['ㄹ', 'ㅍ'], 'ㅀ': ['ㄹ', 'ㅎ'], 'ㅁ': ['ㅁ'], 'ㅂ': ['ㅂ'], 'ㅄ': ['ㅂ', 'ㅅ'],
+      'ㅅ': ['ㅅ'], 'ㅆ': ['ㅆ'], 'ㅇ': ['ㅇ'], 'ㅈ': ['ㅈ'], 'ㅊ': ['ㅊ'], 'ㅋ': ['ㅋ'], 'ㅌ': ['ㅌ'], 'ㅍ': ['ㅍ'], 'ㅎ': ['ㅎ'],
+    };
+
+    function decomposeChar(char) {
+      const code = char.charCodeAt(0);
+      if (code >= 0xac00 && code <= 0xd7a3) {
+        const offset = code - 0xac00;
+        const choIdx = Math.floor(offset / (21 * 28));
+        const jungIdx = Math.floor((offset % (21 * 28)) / 28);
+        const jongIdx = offset % 28;
+
+        const strokes =
+          (CHO_STROKES[choIdx] || 1) +
+          (JUNG_STROKES[jungIdx] || 1) +
+          (JONG_STROKES[jongIdx] || 0);
+
+        return {
+          cho: CHO_CHARS[choIdx] || '',
+          jung: JUNG_CHARS[jungIdx] || '',
+          jong: JONG_CHARS[jongIdx] || '',
+          strokes,
+        };
+      }
+      return null;
+    }
+
+    function countKeystrokes(text) {
+      let strokes = 0;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const decomposed = decomposeChar(char);
+        if (decomposed) {
+          strokes += decomposed.strokes;
+        } else if (SINGLE_JAMO_STROKES[char]) {
+          strokes += SINGLE_JAMO_STROKES[char];
+        } else {
+          strokes += 1;
+        }
+      }
+      return strokes;
+    }
+
+    function calculateCPM(strokes, seconds) {
+      if (strokes <= 0 || seconds <= 0.05) return 0;
+      const minutes = seconds / 60;
+      const cpm = Math.round(strokes / minutes);
+      return Math.min(Math.max(0, cpm), 1500);
+    }
+
+    function textToJamoStream(text) {
+      const stream = [];
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const code = char.charCodeAt(0);
+        if (code >= 0xac00 && code <= 0xd7a3) {
+          const offset = code - 0xac00;
+          const choIdx = Math.floor(offset / (21 * 28));
+          const jungIdx = Math.floor((offset % (21 * 28)) / 28);
+          const jongIdx = offset % 28;
+
+          const cho = CHO_CHARS[choIdx];
+          const jung = JUNG_CHARS[jungIdx];
+          const jong = JONG_CHARS[jongIdx];
+
+          if (cho) stream.push(cho);
+          if (jung) {
+            const jungs = JUNG_DECOMP[jung] || [jung];
+            stream.push(...jungs);
+          }
+          if (jong) {
+            const jongs = JONG_DECOMP[jong] || [jong];
+            stream.push(...jongs);
+          }
+        } else {
+          if (JUNG_DECOMP[char]) {
+            stream.push(...JUNG_DECOMP[char]);
+          } else if (JONG_DECOMP[char]) {
+            stream.push(...JONG_DECOMP[char]);
+          } else {
+            stream.push(char);
+          }
+        }
+      }
+      return stream;
+    }
+
+    function isHangulPrefixMatch(typed, target) {
+      if (!typed) return true;
+      if (typed === target) return true;
+
+      const typedStream = textToJamoStream(typed);
+      const targetStream = textToJamoStream(target);
+
+      if (typedStream.length > targetStream.length) return false;
+
+      for (let i = 0; i < typedStream.length; i++) {
+        if (typedStream[i] !== targetStream[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function calculateAccuracy(keystrokes, typos) {
+      if (keystrokes + typos === 0) return 100;
+      const acc = Math.round((keystrokes / (keystrokes + typos)) * 100);
+      return Math.max(0, Math.min(100, acc));
+    }
+
+    // ==========================================
+    // 3. SOUND SYNTHESIZER & BGM CONTROLLER
+    // ==========================================
+    class SoundManager {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = false;
+        this.bgmAudio = null;
+        this.isBgmEnabled = true;
+        this.isBgmPlaying = false;
+        this.bgmVolume = 0.25;
+
+        // Auto-resume audio on first user touch/click/keypress
+        const unlock = () => {
+          this.initContext();
+          if (this.isBgmEnabled && !this.isMuted) {
+            this.playBgm();
+          }
+          window.removeEventListener('pointerdown', unlock);
+          window.removeEventListener('keydown', unlock);
+        };
+        window.addEventListener('pointerdown', unlock, { passive: true });
+        window.addEventListener('keydown', unlock, { passive: true });
+      }
+
+      initContext() {
+        if (!this.ctx && typeof window !== 'undefined') {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      initBgm() {
+        if (this.bgmAudio) return;
+
+        // publish 폴더 내 같은 경로의 음악 파일(playful-pixels.mp3) 우선 참조
+        const bgmCandidates = [
+          './playful-pixels.mp3',
+          'playful-pixels.mp3',
+          '../public/playful-pixels.mp3',
+          './public/playful-pixels.mp3',
+          '/playful-pixels.mp3'
+        ];
+
+        let index = 0;
+        this.bgmAudio = new Audio();
+        this.bgmAudio.loop = true;
+        this.bgmAudio.volume = this.bgmVolume;
+        this.bgmAudio.preload = 'auto';
+
+        const loadNextCandidate = () => {
+          if (index < bgmCandidates.length) {
+            const nextSrc = bgmCandidates[index++];
+            this.bgmAudio.src = nextSrc;
+            if (this.isBgmEnabled && !this.isMuted) {
+              this.bgmAudio.play().then(() => {
+                this.isBgmPlaying = true;
+              }).catch(() => {});
+            }
+          }
+        };
+
+        this.bgmAudio.addEventListener('error', () => {
+          loadNextCandidate();
+        });
+
+        this.bgmAudio.addEventListener('play', () => {
+          this.isBgmPlaying = true;
+        });
+        this.bgmAudio.addEventListener('pause', () => {
+          this.isBgmPlaying = false;
+        });
+
+        loadNextCandidate();
+      }
+
+      playBgm() {
+        this.isBgmEnabled = true;
+        if (this.isMuted) return;
+        this.initBgm();
+        if (this.bgmAudio) {
+          this.bgmAudio.volume = this.bgmVolume;
+          this.bgmAudio.play().then(() => {
+            this.isBgmPlaying = true;
+          }).catch(() => {
+            this.isBgmPlaying = false;
+          });
+        }
+      }
+
+      pauseBgm() {
+        if (this.bgmAudio) {
+          this.bgmAudio.pause();
+          this.isBgmPlaying = false;
+        }
+      }
+
+      toggleBgm() {
+        this.initBgm();
+        if (this.isBgmPlaying) {
+          this.pauseBgm();
+          this.isBgmEnabled = false;
+          return false;
+        } else {
+          this.isBgmEnabled = true;
+          this.playBgm();
+          return true;
+        }
+      }
+
+      setMuted(muted) {
+        this.isMuted = muted;
+        if (muted) {
+          this.pauseBgm();
+        } else {
+          if (this.isBgmEnabled) {
+            this.playBgm();
+          }
+        }
+      }
+
+      playKeyTap() {
+        if (this.isMuted) return;
+        this.initContext();
+        if (this.isBgmEnabled && !this.isBgmPlaying && this.bgmAudio) {
+          this.playBgm();
+        }
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+
+          const now = this.ctx.currentTime;
+          const freq = 480 + (Math.random() * 60 - 30);
+          osc.frequency.setValueAtTime(freq, now);
+          osc.frequency.exponentialRampToValueAtTime(240, now + 0.05);
+
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } catch {}
+      }
+
+      playTypo() {
+        if (this.isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+
+          const now = this.ctx.currentTime;
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.linearRampToValueAtTime(110, now + 0.12);
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } catch {}
+      }
+
+      playWordSuccess() {
+        if (this.isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+
+            const startTime = now + idx * 0.06;
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.12, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.23);
+          });
+        } catch {}
+      }
+
+      playStageClear() {
+        if (this.isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+
+            const startTime = now + idx * 0.09;
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.18, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.36);
+          });
+        } catch {}
+      }
+
+      playPraiseStamp() {
+        if (this.isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        try {
+          const now = this.ctx.currentTime;
+          const bassOsc = this.ctx.createOscillator();
+          const bassGain = this.ctx.createGain();
+          bassOsc.type = 'sine';
+          bassOsc.frequency.setValueAtTime(140, now);
+          bassOsc.frequency.exponentialRampToValueAtTime(35, now + 0.3);
+
+          bassGain.gain.setValueAtTime(0.35, now);
+          bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+          bassOsc.connect(bassGain);
+          bassGain.connect(this.ctx.destination);
+          bassOsc.start(now);
+          bassOsc.stop(now + 0.35);
+
+          const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+
+            const startTime = now + 0.15 + idx * 0.08;
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.2, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.45);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.46);
+          });
+        } catch {}
+      }
+    }
+
+    const sound = new SoundManager();
+
+    // ==========================================
+    // 4. FOOD DATABASE (1~5 STAGES, 40 WORDS)
+    // ==========================================
+    const RAW_FOODS = [
+      // 1단계: 국민 밥과 든든한 분식 (8개)
+      { id: 'gimbap', name: '김밥', englishName: 'Gimbap', category: '분식', description: '고소한 참기름 냄새 가득, 속이 꽉 찬 소풍 단골 메뉴!', stage: 1 },
+      { id: 'tteokbokki', name: '떡볶이', englishName: 'Tteokbokki', category: '분식', description: '매콤달콤 쫄깃쫄깃 떡과 어묵의 환상적인 만남!', stage: 1 },
+      { id: 'bibimbap', name: '비빔밥', englishName: 'Bibimbap', category: '한식', description: '신선한 나물과 고추장, 참기름으로 쓱쓱 비벼 먹는 별미!', stage: 1 },
+      { id: 'sundae', name: '순대', englishName: 'Sundae', category: '분식', description: '탱글탱글 쫄깃한 당면과 구수한 맛이 일품인 대표 분식!', stage: 1 },
+      { id: 'mandu', name: '만두', englishName: 'Mandu', category: '분식', description: '얇은 피 속에 촉촉하고 풍성한 고기 속이 듬뿍 담긴 만두!', stage: 1 },
+      { id: 'eomuk', name: '어묵', englishName: 'Fish Cake', category: '분식', description: '뜨끈한 국물에 꼬치째 호로록 즐기는 길거리 단골 간식!', stage: 1 },
+      { id: 'kimchi_rice', name: '김치볶음밥', englishName: 'Kimchi Fried Rice', category: '한식', description: '잘 익은 매콤한 김치와 고소한 계란후라이의 황금 조합!', stage: 1 },
+      { id: 'jumeokbap', name: '주먹밥', englishName: 'Rice Ball', category: '분식', description: '고소한 김가루와 참치마요를 둥글둥글 뭉쳐 만든 한입 간식!', stage: 1 },
+
+      // 2단계: 호로록 면과 인기 음식 (8개)
+      { id: 'ramen', name: '라면', englishName: 'Ramen', category: '면류', description: '꼬들꼬들한 면발에 칼칼하고 진한 국물이 끝내주는 야식의 왕!', stage: 2 },
+      { id: 'jajangmyeon', name: '짜장면', englishName: 'Jajangmyeon', category: '중식', description: '달콤 고소한 춘장 소스에 큼직한 고기와 양파가 듬뿍!', stage: 2 },
+      { id: 'chicken', name: '치킨', englishName: 'Fried Chicken', category: '양식', description: '겉은 바삭바삭 속은 촉촉 육즙 가득한 영원한 국민 간식!', stage: 2 },
+      { id: 'jjamppong', name: '짬뽕', englishName: 'Jjamppong', category: '중식', description: '싱싱한 해산물과 얼큰하고 칼칼한 불맛 국물이 환상적인 짬뽕!', stage: 2 },
+      { id: 'kalguksu', name: '칼국수', englishName: 'Kalguksu', category: '면류', description: '손으로 숭덩숭덩 썬 면발과 시원하고 따뜻한 조개 멸치 국물!', stage: 2 },
+      { id: 'udon', name: '우동', englishName: 'Udon', category: '면류', description: '통통하고 쫄깃한 면발과 담백하고 맑은 가쓰오부시 온국물!', stage: 2 },
+      { id: 'tangsuyuk', name: '탕수육', englishName: 'Sweet & Sour Pork', category: '중식', description: '바삭하게 튀겨낸 돼지고기에 새콤달콤 과일 소스를 듬뿍!', stage: 2 },
+      { id: 'tteok_kkochi', name: '떡꼬치', englishName: 'Rice Cake Skewer', category: '간식', description: '노릇노릇 바삭하게 튀겨 새콤달콤 칠리 소스를 바른 추억의 맛!', stage: 2 },
+
+      // 3단계: 든든하고 특별한 일품요리 (8개)
+      { id: 'tonkatsu', name: '돈까스', englishName: 'Tonkatsu', category: '일품', description: '두툼한 생등심에 빵가루를 입혀 바삭하게 튀겨낸 경양식의 정석!', stage: 3 },
+      { id: 'sushi', name: '초밥', englishName: 'Sushi', category: '일식', description: '새콤달콤한 밥 위에 신선하고 부드러운 생선살을 살포시!', stage: 3 },
+      { id: 'pasta', name: '파스타', englishName: 'Pasta', category: '양식', description: '신선한 토마토와 향긋한 바질, 알단테로 삶아낸 스파게티!', stage: 3 },
+      { id: 'curry', name: '카레라이스', englishName: 'Curry Rice', category: '일품', description: '감자, 당근, 고기를 푹 끓여 진하고 향긋한 황금빛 카레 덮밥!', stage: 3 },
+      { id: 'hamburger', name: '햄버거', englishName: 'Hamburger', category: '패스트푸드', description: '육즙 가득 소고기 패티와 신선한 토마토, 고소한 치즈의 조화!', stage: 3 },
+      { id: 'pizza', name: '피자', englishName: 'Pizza', category: '양식', description: '쭉쭉 늘어나는 고소한 모차렐라 치즈와 짭조름한 페퍼로니!', stage: 3 },
+      { id: 'steak', name: '스테이크', englishName: 'Steak', category: '양식', description: '뜨거운 그릴에서 육즙을 가두어 구워낸 부드러운 소고기 요리!', stage: 3 },
+      { id: 'omurice', name: '오므라이스', englishName: 'Omurice', category: '일품', description: '포슬포슬 부드러운 달걀 이불을 덮은 새콤달콤 볶음밥!', stage: 3 },
+
+      // 4단계: 달콤 고소 길거리 간식 & 디저트 (8개)
+      { id: 'hotteok', name: '호떡', englishName: 'Hotteok', category: '간식', description: '기름에 노릇하게 부쳐내어 꿀과 계피가 꿀꺽 흐르는 간식!', stage: 4 },
+      { id: 'bungeoppang', name: '붕어빵', englishName: 'Bungeoppang', category: '간식', description: '겨울철 골목길의 낭만! 머리부터 꼬리까지 달콤한 팥이 꽉!', stage: 4 },
+      { id: 'patbingsu', name: '팥빙수', englishName: 'Shaved Ice', category: '디저트', description: '사각사각 우유 얼음 위에 달콤한 팥과 쫄깃한 떡, 연유!', stage: 4 },
+      { id: 'kkwabaegi', name: '꽈배기', englishName: 'Twisted Donut', category: '간식', description: '쫄깃하고 부드러운 도우에 달콤한 설탕을 솔솔 뿌린 꽈배기!', stage: 4 },
+      { id: 'dak_kkochi', name: '닭꼬치', englishName: 'Chicken Skewer', category: '간식', description: '불향 가득 구워낸 부드러운 닭고기와 달콤 짭조름한 바비큐 소스!', stage: 4 },
+      { id: 'takoyaki', name: '타코야키', englishName: 'Takoyaki', category: '간식', description: '겉바속촉 둥근 반죽 속에 쫄깃한 문어가 쏙! 가쓰오부시가 춤춰요!', stage: 4 },
+      { id: 'macaron', name: '마카롱', englishName: 'Macaron', category: '디저트', description: '알록달록 파스텔 빛 꼬끄 사이에 달콤하고 부드러운 크림이 듬뿍!', stage: 4 },
+      { id: 'yakgwa', name: '약과', englishName: 'Yakgwa', category: '전통한과', description: '달콤한 조청과 은은한 생강 향이 어우러진 꽃모양 전통 과자!', stage: 4 },
+
+      // 5단계: 정성 가득한 일품 잔치 요리 (8개)
+      { id: 'samgyetang', name: '삼계탕', englishName: 'Ginseng Chicken Soup', category: '보양식', description: '영계 속에 찹쌀과 인삼, 대추를 넣고 푹 고아낸 대표 보양식!', stage: 5 },
+      { id: 'galbijjim', name: '갈비찜', englishName: 'Braised Short Ribs', category: '한식', description: '달콤한 간장 양념에 밤, 당근과 함께 부드럽게 쪄낸 명절 요리!', stage: 5 },
+      { id: 'haemulpajeon', name: '해물파전', englishName: 'Seafood Scallion Pancake', category: '전류', description: '달큼한 쪽파와 싱싱한 오징어, 새우를 바삭하게 부친 부침개!', stage: 5 },
+      { id: 'bulgogi', name: '불고기', englishName: 'Bulgogi', category: '한식', description: '달달한 양념에 얇게 썬 소고기와 버섯, 당면을 보글보글 볶은 요리!', stage: 5 },
+      { id: 'japchae', name: '잡채', englishName: 'Japchae', category: '한식', description: '탱글탱글한 당면에 시금치, 버섯, 당근을 고소하게 볶아낸 잔치 음식!', stage: 5 },
+      { id: 'bossam', name: '보쌈', englishName: 'Bossam', category: '한식', description: '부드럽게 삶아낸 돼지고기 수육에 매콤달콤 무말랭이와 배추쌈!', stage: 5 },
+      { id: 'galbitang', name: '갈비탕', englishName: 'Short Rib Soup', category: '탕류', description: '큼직한 소갈비와 대파, 당면을 넣고 맑고 깊게 우려낸 영양 만점 탕!', stage: 5 },
+      { id: 'tteokguk', name: '떡국', englishName: 'Tteokguk', category: '명절음식', description: '뽀얀 사골 국물에 쫄깃한 쌀떡과 달걀 지단을 얹은 새해 맞이 음식!', stage: 5 },
+    ];
+
+    const FOOD_WORDS = RAW_FOODS.map((food) => ({
+      ...food,
+      strokeCount: countKeystrokes(food.name),
+    }));
+
+    const STAGE_CONFIGS = [
+      { stage: 1, title: '1단계: 국민 밥과 든든한 분식', subtitle: '국민 분식 8가지 중 3가지 랜덤 출제' },
+      { stage: 2, title: '2단계: 호로록 면과 인기 음식', subtitle: '대표 인기 음식 8가지 중 3가지 랜덤 출제' },
+      { stage: 3, title: '3단계: 든든하고 특별한 일품요리', subtitle: '인기 만점 일품요리 8가지 중 3가지 랜덤 출제' },
+      { stage: 4, title: '4단계: 달콤 고소 길거리 간식 & 디저트', subtitle: '추억의 달콤 간식 8가지 중 3가지 랜덤 출제' },
+      { stage: 5, title: '5단계: 정성 가득한 일품 잔치 요리', subtitle: '푸짐한 잔칫상 요리 8가지 중 3가지 랜덤 출제' },
+    ];
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function generateGameSessionFoods() {
+      const sessionWords = [];
+      for (let s = 1; s <= 5; s++) {
+        const stagePool = FOOD_WORDS.filter((w) => w.stage === s);
+        const shuffled = shuffleArray(stagePool);
+        sessionWords.push(...shuffled.slice(0, 3));
+      }
+      return sessionWords;
+    }
+
+    // ==========================================
+    // 5. LOCALSTORAGE RANKING UTILITIES
+    // ==========================================
+    const TYPING_RANKING_KEY = 'typingRanking';
+
+    function formatRankingDateTime(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}.${month}.${day} ${hours}:${minutes}`;
+    }
+
+    function compareRankingRecords(a, b) {
+      const aScore = a.score ?? 0;
+      const bScore = b.score ?? 0;
+      if (bScore !== aScore) return bScore - aScore;
+
+      const aCpm = a.cpm ?? 0;
+      const bCpm = b.cpm ?? 0;
+      if (bCpm !== aCpm) return bCpm - aCpm;
+
+      const aTypos = a.typos ?? 0;
+      const bTypos = b.typos ?? 0;
+      if (aTypos !== bTypos) return aTypos - bTypos;
+
+      return (a.date ?? '').localeCompare(b.date ?? '');
+    }
+
+    function getTypingRankings() {
+      try {
+        const raw = localStorage.getItem(TYPING_RANKING_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const sorted = [...parsed].sort(compareRankingRecords);
+          return sorted.slice(0, 10);
+        }
+        return [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveToTypingRanking(name, score, cpm, typos) {
+      const currentList = getTypingRankings();
+
+      const newRecord = {
+        date: formatRankingDateTime(new Date()),
+        name: name.trim().slice(0, 8),
+        score: typeof score === 'number' ? score : 0,
+        cpm: typeof cpm === 'number' ? Math.round(cpm) : 0,
+        typos: typeof typos === 'number' ? typos : 0,
+      };
+
+      const updatedList = [...currentList, newRecord].sort(compareRankingRecords);
+      const top10 = updatedList.slice(0, 10);
+
+      try {
+        localStorage.setItem(TYPING_RANKING_KEY, JSON.stringify(top10));
+      } catch (err) {}
+
+      const rankedList = getHallOfFameRanking(newRecord);
+      const found = rankedList.find((item) => item.isNew);
+
+      return {
+        record: newRecord,
+        rank: found ? found.rank : 1,
+        rankBadge: found ? found.rankBadge : '🥇 1위',
+      };
+    }
+
+    function getHallOfFameRanking(highlightRecord = null) {
+      const rawList = getTypingRankings();
+      const sorted = [...rawList].sort(compareRankingRecords).slice(0, 10);
+
+      const ranked = [];
+      for (let i = 0; i < sorted.length; i++) {
+        const item = sorted[i];
+        const score = item.score ?? 0;
+        const cpm = item.cpm ?? 0;
+        const typos = item.typos ?? 0;
+
+        let rank;
+        if (i === 0) {
+          rank = 1;
+        } else {
+          const prev = sorted[i - 1];
+          const prevScore = prev.score ?? 0;
+          const prevCpm = prev.cpm ?? 0;
+          const prevTypos = prev.typos ?? 0;
+
+          if (score === prevScore && cpm === prevCpm && typos === prevTypos) {
+            rank = ranked[i - 1].rank;
+          } else {
+            rank = i + 1;
+          }
+        }
+
+        let rankBadge = `${rank}위`;
+        if (rank === 1) rankBadge = `🥇 1위`;
+        else if (rank === 2) rankBadge = `🥈 2위`;
+        else if (rank === 3) rankBadge = `🥉 3위`;
+
+        const isNew = !!(
+          highlightRecord &&
+          highlightRecord.name === item.name &&
+          highlightRecord.date === item.date &&
+          highlightRecord.score === item.score &&
+          (highlightRecord.cpm === undefined || highlightRecord.cpm === item.cpm)
+        );
+
+        ranked.push({
+          ...item,
+          score,
+          cpm,
+          typos,
+          rank,
+          rankBadge,
+          isNew,
+        });
+      }
+
+      return ranked;
+    }
+
+    function calculatePotentialRank(score, cpm, typos) {
+      const existing = getTypingRankings();
+
+      const tempRecord = {
+        date: '9999.99.99 99:99',
+        name: 'ME',
+        score: typeof score === 'number' ? score : 0,
+        cpm: typeof cpm === 'number' ? Math.round(cpm) : 0,
+        typos: typeof typos === 'number' ? typos : 0,
+      };
+
+      const strictlyBetterCount = existing.filter((item) => {
+        return compareRankingRecords(item, tempRecord) < 0;
+      }).length;
+
+      const rank = strictlyBetterCount + 1;
+
+      let rankBadge = `${rank}위`;
+      if (rank === 1) rankBadge = `🥇 1위`;
+      else if (rank === 2) rankBadge = `🥈 2위`;
+      else if (rank === 3) rankBadge = `🥉 3위`;
+
+      return {
+        rank,
+        rankBadge,
+        totalPlayers: existing.length + 1,
+      };
+    }
+
+    function clearTypingRanking() {
+      try {
+        localStorage.removeItem(TYPING_RANKING_KEY);
+      } catch (err) {}
+    }
+
+    function downloadTypingRankingsAsJson() {
+      try {
+        const raw = localStorage.getItem(TYPING_RANKING_KEY);
+        const data = raw ? JSON.parse(raw) : [];
+
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const mm = pad(now.getMonth() + 1);
+        const dd = pad(now.getDate());
+        const hh = pad(now.getHours());
+        const min = pad(now.getMinutes());
+        const ss = pad(now.getSeconds());
+
+        const filename = `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}_typeRanking.json`;
+
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        return { success: true, filename, count: Array.isArray(data) ? data.length : 0 };
+      } catch (err) {
+        return { success: false, filename: '', count: 0 };
+      }
+    }
+
+    // ==========================================
+    // 6. FOOD ILLUSTRATION COMPONENT (CARTOON SVG)
+    // ==========================================
+    const DisneyFace = ({ cx1 = 40, cx2 = 60, cy = 48, r = 5.5, mouthY, openMouth = true }) => {
+      const nX1 = Number(cx1);
+      const nX2 = Number(cx2);
+      const nY = Number(cy);
+      const nR = Number(r);
+      const mY = mouthY !== undefined ? Number(mouthY) : nY + 8;
+      const midX = (nX1 + nX2) / 2;
+      return (
+        <g>
+          <ellipse cx={nX1 - 6} cy={nY + 7} rx={5} ry={3} fill="#ff6487" opacity="0.55" />
+          <ellipse cx={nX2 + 6} cy={nY + 7} rx={5} ry={3} fill="#ff6487" opacity="0.55" />
+          <ellipse cx={nX1} cy={nY} rx={nR} ry={nR * 1.15} fill="#1e1b4b" />
+          <ellipse cx={nX1 - nR * 0.28} cy={nY - nR * 0.35} rx={nR * 0.45} ry={nR * 0.45} fill="#ffffff" />
+          <circle cx={nX1 + nR * 0.32} cy={nY + nR * 0.3} r={nR * 0.2} fill="#ffffff" />
+          <ellipse cx={nX2} cy={nY} rx={nR} ry={nR * 1.15} fill="#1e1b4b" />
+          <ellipse cx={nX2 - nR * 0.28} cy={nY - nR * 0.35} rx={nR * 0.45} ry={nR * 0.45} fill="#ffffff" />
+          <circle cx={nX2 + nR * 0.32} cy={nY + nR * 0.3} r={nR * 0.2} fill="#ffffff" />
+          <path d={`M${nX1 - nR} ${nY - nR * 1.3} Q${nX1} ${nY - nR * 1.7} ${nX1 + nR * 0.8} ${nY - nR * 1.3}`} stroke="#312e81" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+          <path d={`M${nX2 - nR * 0.8} ${nY - nR * 1.3} Q${nX2} ${nY - nR * 1.7} ${nX2 + nR} ${nY - nR * 1.3}`} stroke="#312e81" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+          {openMouth ? (
+            <g>
+              <path d={`M${nX1 + 4} ${mY} Q${midX} ${mY + 9} ${nX2 - 4} ${mY} Z`} fill="#be123c" stroke="#1e1b4b" strokeWidth="1.8" />
+              <path d={`M${midX - 3.5} ${mY + 4} Q${midX} ${mY + 2} ${midX + 3.5} ${mY + 4} Q${midX} ${mY + 8} ${midX - 3.5} ${mY + 4} Z`} fill="#f43f5e" />
+            </g>
+          ) : (
+            <path d={`M${nX1 + 4} ${mY} Q${midX} ${mY + 5} ${nX2 - 4} ${mY}`} stroke="#1e1b4b" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+          )}
+        </g>
+      );
+    };
+
+    const DisneySparkle = ({ cx, cy, color = "#fef08a", s = 1 }) => (
+      <g transform={`translate(${cx}, ${cy}) scale(${s})`}>
+        <path d="M0 -6 Q0 0 6 0 Q0 0 0 6 Q0 0 -6 0 Q0 0 0 -6 Z" fill={color} opacity="0.9" />
+        <circle cx="0" cy="0" r="1.5" fill="#ffffff" />
+      </g>
+    );
+
+    const FoodIllustration = ({ id, size = 'md', className = '' }) => {
+      const sizeMap = {
+        sm: 'w-10 h-10 sm:w-12 sm:h-12',
+        md: 'w-16 h-16 sm:w-20 sm:h-20',
+        lg: 'w-24 h-24 sm:w-28 sm:h-28',
+        xl: 'w-36 h-36 sm:w-44 sm:h-44',
+      };
+      const currentSizeClass = sizeMap[size] || sizeMap.md;
+
+      const renderSvg = () => {
+        switch (id) {
+          case 'gimbap':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <circle cx="50" cy="50" r="44" fill="#0f172a" stroke="#020617" strokeWidth="3" />
+                <path d="M22 28 Q40 16 68 22" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.35" fill="none" />
+                <circle cx="50" cy="50" r="35" fill="#f8fafc" />
+                <circle cx="50" cy="50" r="23" fill="#fed7aa" stroke="#fdba74" strokeWidth="1.5" />
+                <path d="M38 38 Q50 32 62 38 Q50 44 38 38" fill="#facc15" stroke="#eab308" strokeWidth="1" />
+                <circle cx="37" cy="48" r="6.5" fill="#22c55e" />
+                <circle cx="63" cy="48" r="6.5" fill="#f97316" />
+                <circle cx="45" cy="62" r="6.5" fill="#f43f5e" />
+                <circle cx="56" cy="61" r="6" fill="#fbbf24" />
+                <DisneyFace cx1="44" cx2="56" cy="48" r="3.6" mouthY="55" />
+                <circle cx="28" cy="24" r="1.5" fill="#fef08a" />
+                <circle cx="70" cy="28" r="1.5" fill="#fef08a" />
+                <DisneySparkle cx="80" cy="22" s={0.9} />
+              </svg>
+            );
+          case 'tteokbokki':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="74" rx="43" ry="17" fill="#0284c7" stroke="#0369a1" strokeWidth="2.5" />
+                <ellipse cx="50" cy="62" rx="40" ry="14" fill="#e0f2fe" />
+                <ellipse cx="50" cy="58" rx="37" ry="13" fill="#dc2626" />
+                <g transform="rotate(-10 50 48)">
+                  <rect x="34" y="36" width="32" height="15" rx="7.5" fill="#ffffff" stroke="#e11d48" strokeWidth="2" />
+                  <path d="M38 41 Q50 37 62 41" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" opacity="0.6" fill="none" />
+                  <DisneyFace cx1="44" cx2="56" cy="43" r="2.8" mouthY="48" />
+                </g>
+                <rect x="22" y="48" width="28" height="13" rx="6.5" fill="#fff1f2" stroke="#e11d48" strokeWidth="1.8" transform="rotate(-25 36 54)" />
+                <rect x="48" y="52" width="28" height="13" rx="6.5" fill="#fff1f2" stroke="#e11d48" strokeWidth="1.8" transform="rotate(15 62 58)" />
+                <ellipse cx="68" cy="42" rx="9" ry="12" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" transform="rotate(-20 68 42)" />
+                <circle cx="67" cy="43" r="5.5" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1" />
+                <rect x="36" y="32" width="7" height="4" rx="1.5" fill="#22c55e" />
+                <DisneySparkle cx="24" cy="24" s={1} />
+                <DisneySparkle cx="78" cy="20" s={0.8} />
+              </svg>
+            );
+          case 'bibimbap':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="74" rx="43" ry="17" fill="#1e293b" stroke="#0f172a" strokeWidth="2.5" />
+                <ellipse cx="50" cy="56" rx="40" ry="15" fill="#334155" />
+                <ellipse cx="50" cy="54" rx="37" ry="13" fill="#ffffff" />
+                <path d="M50 54 L24 48 A37 13 0 0 1 38 42 Z" fill="#22c55e" />
+                <path d="M50 54 L38 42 A37 13 0 0 1 62 42 Z" fill="#f97316" />
+                <path d="M50 54 L62 42 A37 13 0 0 1 76 48 Z" fill="#eab308" />
+                <path d="M50 54 L76 48 A37 13 0 0 1 68 63 Z" fill="#854d0e" />
+                <path d="M50 54 L68 63 A37 13 0 0 1 32 63 Z" fill="#ef4444" />
+                <path d="M50 54 L32 63 A37 13 0 0 1 24 48 Z" fill="#a855f7" />
+                <ellipse cx="50" cy="52" rx="17" ry="13" fill="#ffffff" stroke="#f1f5f9" strokeWidth="2" />
+                <circle cx="50" cy="51" r="9" fill="#f59e0b" stroke="#d97706" strokeWidth="1.5" />
+                <DisneyFace cx1="47" cx2="53" cy="50" r="2.2" mouthY="55" />
+                <DisneySparkle cx="82" cy="30" s={1} />
+              </svg>
+            );
+          case 'ramen':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="74" rx="42" ry="17" fill="#b91c1c" stroke="#991b1b" strokeWidth="2.5" />
+                <ellipse cx="50" cy="58" rx="39" ry="14" fill="#ea580c" />
+                <ellipse cx="50" cy="54" rx="32" ry="12" fill="#fde047" stroke="#eab308" strokeWidth="2" />
+                <path d="M30 48 Q35 38 42 48 Q48 38 54 48 Q60 38 68 48" stroke="#facc15" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                <DisneyFace cx1="44" cx2="56" cy="52" r="3.2" mouthY="58" />
+                <circle cx="34" cy="44" r="7" fill="#ffffff" stroke="#f43f5e" strokeWidth="1.8" />
+                <path d="M32 44 Q34 41 36 44 Q34 47 32 44" stroke="#f43f5e" strokeWidth="2" fill="none" />
+                <circle cx="68" cy="46" r="6" fill="#fbbf24" stroke="#ffffff" strokeWidth="2" />
+                <line x1="42" y1="28" x2="84" y2="12" stroke="#b45309" strokeWidth="3" strokeLinecap="round" />
+                <line x1="46" y1="32" x2="88" y2="16" stroke="#92400e" strokeWidth="3" strokeLinecap="round" />
+                <DisneySparkle cx="24" cy="22" s={0.9} />
+              </svg>
+            );
+          case 'jajangmyeon':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="74" rx="42" ry="17" fill="#ffffff" stroke="#cbd5e1" strokeWidth="3" />
+                <ellipse cx="50" cy="58" rx="39" ry="14" fill="#fef08a" />
+                <ellipse cx="50" cy="54" rx="34" ry="14" fill="#18181b" stroke="#000000" strokeWidth="2" />
+                <path d="M28 48 Q42 40 60 44" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.4" fill="none" />
+                <DisneyFace cx1="42" cx2="58" cy="52" r="3.4" mouthY="58" />
+                <g transform="translate(50, 40) rotate(-10)">
+                  <rect x="-12" y="-3" width="24" height="4" rx="2" fill="#22c55e" stroke="#16a34a" strokeWidth="1" />
+                  <rect x="-10" y="2" width="20" height="4" rx="2" fill="#4ade80" />
+                </g>
+                <DisneySparkle cx="76" cy="28" s={1} />
+              </svg>
+            );
+          case 'chicken':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <g transform="rotate(-35 32 70)">
+                  <rect x="20" y="66" width="22" height="9" rx="4.5" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" />
+                  <circle cx="18" cy="77" r="5.5" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.5" />
+                  <circle cx="26" cy="79" r="5.5" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.5" />
+                </g>
+                <ellipse cx="58" cy="46" rx="28" ry="21" fill="#f59e0b" stroke="#92400e" strokeWidth="2.5" transform="rotate(-30 58 46)" />
+                <circle cx="48" cy="38" r="2.5" fill="#fef08a" />
+                <circle cx="68" cy="44" r="3" fill="#fef08a" />
+                <g transform="rotate(-15 56 46)">
+                  <DisneyFace cx1="50" cx2="64" cy="45" r="3.2" mouthY="51" />
+                </g>
+                <DisneySparkle cx="78" cy="18" s={1.1} />
+              </svg>
+            );
+          case 'tonkatsu':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="70" rx="43" ry="17" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2.5" />
+                <ellipse cx="48" cy="55" rx="34" ry="18" fill="#fbbf24" stroke="#b45309" strokeWidth="2.5" />
+                <line x1="28" y1="44" x2="30" y2="66" stroke="#92400e" strokeWidth="1.8" />
+                <line x1="40" y1="40" x2="42" y2="70" stroke="#92400e" strokeWidth="1.8" />
+                <line x1="52" y1="39" x2="54" y2="71" stroke="#92400e" strokeWidth="1.8" />
+                <line x1="64" y1="42" x2="66" y2="67" stroke="#92400e" strokeWidth="1.8" />
+                <path d="M26 52 Q38 44 48 56 Q58 44 70 52" stroke="#451a03" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+                <DisneyFace cx1="40" cx2="54" cy="50" r="3" mouthY="56" />
+                <circle cx="76" cy="46" r="5" fill="#ef4444" stroke="#dc2626" strokeWidth="1.5" />
+                <DisneySparkle cx="22" cy="30" s={0.9} />
+              </svg>
+            );
+          case 'sushi':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <rect x="14" y="68" width="72" height="8" rx="2" fill="#d97706" stroke="#b45309" strokeWidth="2" />
+                <rect x="22" y="76" width="8" height="6" fill="#92400e" />
+                <rect x="70" y="76" width="8" height="6" fill="#92400e" />
+                <ellipse cx="50" cy="58" rx="27" ry="13" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" />
+                <path d="M22 50 Q50 34 78 50 Q75 64 50 60 Q25 64 22 50 Z" fill="#fb7185" stroke="#be123c" strokeWidth="2.5" />
+                <path d="M36 44 Q44 48 46 54" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" opacity="0.65" fill="none" />
+                <path d="M54 42 Q60 48 62 54" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" opacity="0.65" fill="none" />
+                <DisneyFace cx1="44" cx2="58" cy="48" r="2.8" mouthY="54" />
+                <circle cx="80" cy="56" r="5" fill="#84cc16" stroke="#4d7c0f" strokeWidth="1.2" />
+                <DisneySparkle cx="80" cy="24" s={0.9} />
+              </svg>
+            );
+          case 'pasta':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="72" rx="43" ry="17" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2.5" />
+                <ellipse cx="50" cy="58" rx="35" ry="14" fill="#fef08a" />
+                <path d="M30 56 Q50 36 70 56 Q56 74 34 64 Q28 48 48 46 Q68 44 64 60" stroke="#facc15" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                <circle cx="50" cy="52" r="14" fill="#dc2626" stroke="#b91c1c" strokeWidth="1.5" />
+                <DisneyFace cx1="46" cx2="54" cy="50" r="2.4" mouthY="55" />
+                <ellipse cx="44" cy="42" rx="4" ry="6" fill="#16a34a" transform="rotate(-30 44 42)" />
+                <ellipse cx="56" cy="42" rx="4" ry="6" fill="#22c55e" transform="rotate(35 56 42)" />
+                <DisneySparkle cx="78" cy="24" s={1} />
+              </svg>
+            );
+          case 'hotteok':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <path d="M34 60 L38 84 L62 84 L66 60 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" />
+                <circle cx="50" cy="46" r="30" fill="#f59e0b" stroke="#92400e" strokeWidth="2.5" />
+                <circle cx="50" cy="46" r="19" fill="#d97706" />
+                <DisneyFace cx1="43" cx2="57" cy="44" r="3.2" mouthY="50" />
+                <circle cx="42" cy="38" r="1.5" fill="#fef08a" />
+                <circle cx="58" cy="38" r="1.5" fill="#fef08a" />
+                <DisneySparkle cx="80" cy="20" s={1} />
+              </svg>
+            );
+          case 'bungeoppang':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <path d="M22 50 Q36 32 64 36 Q76 42 84 30 Q82 48 86 54 Q80 50 76 56 Q62 68 36 64 Q20 62 22 50 Z" fill="#fbbf24" stroke="#b45309" strokeWidth="2.5" />
+                <path d="M48 42 Q52 46 48 52" stroke="#d97706" strokeWidth="2" strokeLinecap="round" fill="none" />
+                <path d="M56 40 Q60 46 56 54" stroke="#d97706" strokeWidth="2" strokeLinecap="round" fill="none" />
+                <ellipse cx="34" cy="46" rx="5.5" ry="6.5" fill="#1e1b4b" />
+                <ellipse cx="32" cy="44" rx="2.4" ry="2.4" fill="#ffffff" />
+                <ellipse cx="30" cy="54" rx="3.5" ry="2.2" fill="#ff6487" opacity="0.6" />
+                <path d="M34 52 Q37 56 40 52" stroke="#1e1b4b" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+                <DisneySparkle cx="84" cy="18" s={1} />
+              </svg>
+            );
+          case 'patbingsu':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <path d="M22 54 Q50 90 78 54 Z" fill="#e0f2fe" opacity="0.75" stroke="#38bdf8" strokeWidth="2.5" />
+                <ellipse cx="50" cy="54" rx="30" ry="8" fill="#bae6fd" stroke="#38bdf8" strokeWidth="1.5" />
+                <ellipse cx="50" cy="46" rx="28" ry="20" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+                <path d="M34 38 Q50 28 66 38 Q62 46 50 44 Q38 46 34 38 Z" fill="#78350f" stroke="#451a03" strokeWidth="1.5" />
+                <rect x="44" y="26" width="12" height="9" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1.2" />
+                <DisneyFace cx1="43" cx2="57" cy="46" r="3" mouthY="52" />
+                <DisneySparkle cx="80" cy="20" s={1.1} color="#67e8f9" />
+              </svg>
+            );
+          case 'samgyetang':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="74" rx="43" ry="17" fill="#0f172a" stroke="#090d16" strokeWidth="2.5" />
+                <ellipse cx="50" cy="58" rx="40" ry="14" fill="#fef08a" opacity="0.4" stroke="#ca8a04" strokeWidth="1.5" />
+                <ellipse cx="50" cy="50" rx="26" ry="18" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" />
+                <DisneyFace cx1="44" cx2="56" cy="46" r="2.8" mouthY="52" />
+                <path d="M48 24 L52 34" stroke="#ca8a04" strokeWidth="2.5" strokeLinecap="round" />
+                <ellipse cx="64" cy="46" rx="5" ry="3.5" fill="#991b1b" stroke="#7f1d1d" strokeWidth="1" />
+                <rect x="36" y="52" width="7" height="3" rx="1" fill="#22c55e" />
+                <DisneySparkle cx="78" cy="22" s={1} />
+              </svg>
+            );
+          case 'galbijjim':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="74" rx="43" ry="17" fill="#1e293b" stroke="#0f172a" strokeWidth="2.5" />
+                <ellipse cx="50" cy="58" rx="40" ry="14" fill="#451a03" />
+                <rect x="28" y="42" width="44" height="22" rx="8" fill="#78350f" stroke="#451a03" strokeWidth="2" />
+                <ellipse cx="72" cy="46" rx="6" ry="5" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.5" />
+                <DisneyFace cx1="42" cx2="56" cy="51" r="3" mouthY="57" />
+                <circle cx="34" cy="40" r="6" fill="#f59e0b" stroke="#d97706" strokeWidth="1.2" />
+                <ellipse cx="52" cy="38" rx="5" ry="4" fill="#ea580c" />
+                <DisneySparkle cx="80" cy="20" s={1} />
+              </svg>
+            );
+          case 'haemulpajeon':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="72" rx="43" ry="17" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2.5" />
+                <ellipse cx="50" cy="56" rx="38" ry="18" fill="#facc15" stroke="#b45309" strokeWidth="2" />
+                <line x1="24" y1="52" x2="76" y2="52" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" />
+                <line x1="28" y1="58" x2="72" y2="58" stroke="#15803d" strokeWidth="3" strokeLinecap="round" />
+                <path d="M46 36 Q60 30 64 42 Q58 44 54 38 Q48 40 46 36 Z" fill="#fb7185" stroke="#e11d48" strokeWidth="1.5" />
+                <DisneyFace cx1="42" cx2="58" cy="54" r="3" mouthY="60" />
+                <DisneySparkle cx="80" cy="24" s={1} />
+              </svg>
+            );
+          case 'sundae':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <ellipse cx="50" cy="70" rx="40" ry="16" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
+                <ellipse cx="34" cy="52" rx="14" ry="18" fill="#4a0404" stroke="#2c0000" strokeWidth="2" transform="rotate(-15 34 52)" />
+                <ellipse cx="64" cy="54" rx="15" ry="18" fill="#581c1c" stroke="#2c0000" strokeWidth="2" transform="rotate(15 64 54)" />
+                <ellipse cx="48" cy="46" rx="16" ry="19" fill="#7f1d1d" stroke="#3f0000" strokeWidth="2.5" />
+                <DisneyFace cx1="42" cx2="54" cy="46" r="2.8" mouthY="52" />
+                <DisneySparkle cx="78" cy="22" s={0.9} />
+              </svg>
+            );
+          case 'mandu':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <path d="M20 62 Q50 20 80 62 Q50 78 20 62 Z" fill="#fef9c3" stroke="#ca8a04" strokeWidth="2.5" />
+                <DisneyFace cx1="42" cx2="58" cy="52" r="3.2" mouthY="58" />
+                <DisneySparkle cx="76" cy="24" s={0.9} />
+              </svg>
+            );
+          case 'pizza':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <path d="M50 18 L84 76 Q50 86 16 76 Z" fill="#facc15" stroke="#ca8a04" strokeWidth="2.5" />
+                <circle cx="38" cy="62" r="5" fill="#dc2626" />
+                <circle cx="62" cy="60" r="5" fill="#dc2626" />
+                <circle cx="50" cy="42" r="4.5" fill="#dc2626" />
+                <DisneyFace cx1="44" cx2="56" cy="52" r="2.6" mouthY="57" />
+                <DisneySparkle cx="78" cy="22" s={0.9} />
+              </svg>
+            );
+          case 'hamburger':
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <path d="M22 46 Q50 20 78 46 Z" fill="#d97706" stroke="#92400e" strokeWidth="2.5" />
+                <rect x="20" y="48" width="60" height="6" rx="3" fill="#22c55e" />
+                <rect x="22" y="54" width="56" height="5" rx="2" fill="#ef4444" />
+                <rect x="20" y="65" width="60" height="8" rx="4" fill="#78350f" />
+                <rect x="24" y="74" width="52" height="7" rx="3.5" fill="#d97706" />
+                <DisneyFace cx1="42" cx2="58" cy="38" r="2.8" mouthY="43" />
+                <DisneySparkle cx="80" cy="20" s={0.9} />
+              </svg>
+            );
+          default:
+            return (
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                <circle cx="50" cy="50" r="40" fill="#fef3c7" stroke="#f59e0b" strokeWidth="3" />
+                <DisneyFace cx1="40" cx2="60" cy="48" r="4.5" mouthY="58" />
+                <DisneySparkle cx="76" cy="24" s={1} />
+              </svg>
+            );
+        }
+      };
+
+      return (
+        <div className={`relative inline-flex items-center justify-center ${currentSizeClass} ${className}`}>
+          {renderSvg()}
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 7. HEADER COMPONENT
+    // ==========================================
+    const Header = ({
+      currentStage,
+      totalScore,
+      maxScore,
+      isMuted,
+      isBgmActive,
+      onToggleMute,
+      onToggleBgm,
+      onResetGame,
+      onSelectStage,
+      onOpenRankings,
+    }) => {
+      return (
+        <header className="w-full bg-white/95 backdrop-blur-md border-b border-amber-200/60 sticky top-0 z-40 shrink-0">
+          <div className="max-w-7xl mx-auto px-3 sm:px-5 h-13 sm:h-14 flex items-center justify-between gap-3">
+            {/* Brand Zone */}
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              <span className="text-2xl select-none">🍱</span>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onResetGame();
+                }}
+                className="text-xl font-extrabold tracking-tight text-amber-950 font-['Jua',sans-serif] whitespace-nowrap hover:text-amber-800 transition-colors"
+              >
+                맛있는 음식 타자 연습
+              </a>
+            </div>
+
+            {/* Stage navigation links */}
+            <nav className="hidden md:flex items-center gap-1 sm:gap-2">
+              {[1, 2, 3, 4, 5].map((stg) => {
+                const isActive = currentStage === stg;
+                return (
+                  <button
+                    key={stg}
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      onSelectStage(stg);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+                      isActive
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'text-amber-900/70 hover:bg-amber-100/70 hover:text-amber-950'
+                    }`}
+                  >
+                    {stg}단계
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Score & Controls */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold font-['Outfit',sans-serif]">
+                <Award className="w-3.5 h-3.5 text-amber-600" />
+                <span>{totalScore}</span>
+                <span className="text-amber-900/40">/</span>
+                <span className="text-amber-900/60">{maxScore}점</span>
+              </div>
+
+              {onOpenRankings && (
+                <button
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    onOpenRankings();
+                  }}
+                  className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all flex items-center gap-1.5 text-xs sm:text-sm font-bold font-['Jua',sans-serif] shadow-xs hover:shadow-sm hover:scale-[1.02] cursor-pointer"
+                  title="명예의 전당 순위표 보기"
+                >
+                  <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-200" />
+                  <span>🏆 명예의 전당</span>
+                </button>
+              )}
+
+              {/* BGM Toggle Button */}
+              <button
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  onToggleBgm();
+                }}
+                className={`p-2 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium ${
+                  isBgmActive && !isMuted
+                    ? 'bg-amber-100 text-amber-900 font-semibold shadow-xs'
+                    : 'text-amber-900/50 hover:bg-amber-100/60 hover:text-amber-800'
+                }`}
+                title={isBgmActive && !isMuted ? '배경음악 끄기 (반복 재생 중)' : '배경음악 켜기'}
+              >
+                {isBgmActive && !isMuted ? (
+                  <>
+                    <Music2 className="w-4 h-4 text-amber-700 animate-pulse" />
+                    <span className="hidden sm:inline text-[11px] text-amber-800">BGM</span>
+                  </>
+                ) : (
+                  <>
+                    <Music className="w-4 h-4 text-slate-400" />
+                    <span className="hidden sm:inline text-[11px] text-slate-400">BGM</span>
+                  </>
+                )}
+              </button>
+
+              {/* Sound FX Toggle */}
+              <button
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  sound.playKeyTap();
+                  onToggleMute();
+                }}
+                className="p-2 rounded-lg text-amber-900/70 hover:bg-amber-100/70 hover:text-amber-950 transition-colors"
+                title={isMuted ? '효과음 및 전체 소리 켜기' : '효과음 및 전체 소리 끄기'}
+              >
+                {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-amber-700" />}
+              </button>
+
+              {/* Reset Button */}
+              <button
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  if (window.confirm('처음부터 다시 시작하시겠습니까?')) {
+                    onResetGame();
+                  }
+                }}
+                className="p-2 rounded-lg text-amber-900/70 hover:bg-amber-100/70 hover:text-amber-950 transition-colors"
+                title="처음부터 다시하기"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </header>
+      );
+    };
+
+    // ==========================================
+    // 8. STAGE PROGRESS BAR COMPONENT
+    // ==========================================
+    const StageProgressBar = ({
+      stage,
+      wordIndex,
+      totalWordsInStage,
+      currentCpm,
+      averageCpm,
+      totalKeystrokes,
+      accuracy,
+      totalTypos,
+      onOpenRankings,
+    }) => {
+      const currentStageInfo = STAGE_CONFIGS.find((s) => s.stage === stage) || STAGE_CONFIGS[0];
+      const progressPercent = Math.min(100, Math.round((wordIndex / totalWordsInStage) * 100));
+
+      return (
+        <div className="w-full bg-white rounded-2xl border border-amber-200/80 shadow-xs px-3.5 py-2.5 sm:px-4 sm:py-3 shrink-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-['Outfit',sans-serif]">
+                STAGE {stage} / 5
+              </span>
+              <h2 className="text-base sm:text-lg font-bold text-amber-950 font-['Jua',sans-serif]">
+                {currentStageInfo.title}
+              </h2>
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-100/90 border border-amber-300 px-1.5 py-0.5 rounded-md flex items-center gap-1 font-['Jua',sans-serif]">
+                🎲 단어 랜덤 출제
+              </span>
+              {onOpenRankings && (
+                <button
+                  onClick={onOpenRankings}
+                  className="px-2.5 py-0.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-[11px] font-['Jua',sans-serif] flex items-center gap-1 shadow-2xs transition-all hover:scale-105 cursor-pointer ml-1"
+                  title="명예의 전당 순위표 보기"
+                >
+                  <Trophy className="w-3 h-3 text-yellow-200" />
+                  <span>🏆 명예의 전당</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center flex-wrap gap-2 sm:gap-3 text-xs font-medium text-amber-900/80 bg-amber-50/70 px-3 py-1.5 rounded-xl border border-amber-200/60 font-['Outfit',sans-serif]">
+              {/* Current Speed */}
+              <div className="flex items-center gap-1.5" title="현재 단어 타자 속도 (타/분)">
+                <Zap className="w-3.5 h-3.5 text-amber-600" />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[10px] text-amber-800/60 font-sans">현재타속:</span>
+                  <span className="text-sm font-extrabold text-amber-950 tabular-nums">
+                    {currentCpm > 0 ? `${currentCpm}` : '-'}
+                  </span>
+                  <span className="text-[10px] text-amber-800/60">타/분</span>
+                </div>
+              </div>
+
+              <div className="w-px h-4 bg-amber-200" />
+
+              {/* Average Speed */}
+              <div className="flex items-center gap-1.5" title="전체 누적 평균 타자 속도 (타/분)">
+                <Target className="w-3.5 h-3.5 text-amber-600" />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[10px] text-amber-800/60 font-sans">평균타속:</span>
+                  <span className="text-sm font-extrabold text-amber-950 tabular-nums">
+                    {averageCpm > 0 ? `${averageCpm}` : '-'}
+                  </span>
+                  <span className="text-[10px] text-amber-800/60">타/분</span>
+                </div>
+              </div>
+
+              <div className="w-px h-4 bg-amber-200" />
+
+              {/* Keystrokes */}
+              <div className="flex items-center gap-1" title="총 타수">
+                <span className="text-xs select-none">⌨️</span>
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-[10px] text-amber-800/60 font-sans">총타수:</span>
+                  <span className="text-sm font-extrabold text-amber-950 tabular-nums">
+                    {totalKeystrokes}
+                  </span>
+                  <span className="text-[10px] text-amber-800/60">타</span>
+                </div>
+              </div>
+
+              <div className="w-px h-4 bg-amber-200" />
+
+              {/* Typos */}
+              <div className="flex items-center gap-1" title="누적 오타 횟수">
+                <ShieldAlert className={`w-3.5 h-3.5 ${totalTypos > 0 ? 'text-red-500' : 'text-emerald-600'}`} />
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-[10px] text-amber-800/60 font-sans">오타:</span>
+                  <span className={`text-sm font-bold tabular-nums ${totalTypos > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                    {totalTypos}회
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-px h-4 bg-amber-200" />
+
+              {/* Accuracy */}
+              <div className="flex items-center gap-1" title="정확도">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-[10px] text-amber-800/60 font-sans">정확도:</span>
+                  <span className="text-sm font-extrabold text-amber-950 tabular-nums">
+                    {accuracy}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-amber-100">
+            <div className="flex-1 flex items-center gap-2">
+              <div className="flex-1 h-2 bg-amber-100 rounded-full overflow-hidden border border-amber-200/50">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-bold text-amber-900/60 font-['Outfit',sans-serif] shrink-0">
+                {wordIndex}/{totalWordsInStage} 단어 ({progressPercent}%)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {[1, 2, 3, 4, 5].map((s) => {
+                const isDone = s < stage;
+                const isCurrent = s === stage;
+                return (
+                  <div
+                    key={s}
+                    className={`w-4 h-4 rounded-full flex items-center justify-center font-bold text-[9px] font-['Outfit',sans-serif] ${
+                      isDone
+                        ? 'bg-emerald-500 text-white'
+                        : isCurrent
+                        ? 'bg-amber-600 text-white ring-2 ring-amber-200'
+                        : 'bg-amber-100 text-amber-800/50'
+                    }`}
+                  >
+                    {isDone ? '✓' : s}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 9. TYPING INPUT COMPONENT
+    // ==========================================
+    const TypingInput = ({
+      currentWord,
+      gameState = 'PLAYING',
+      onWordComplete,
+      onLiveCpmUpdate,
+    }) => {
+      const [inputValue, setInputValue] = useState('');
+      const [hasTypo, setHasTypo] = useState(false);
+      const [typoCount, setTypoCount] = useState(0);
+      const [feedbackEffect, setFeedbackEffect] = useState(null);
+      const inputRef = useRef(null);
+      const isComposingRef = useRef(false);
+      const isFinishedRef = useRef(false);
+
+      const firstKeystrokeTimeRef = useRef(null);
+      const lastKeystrokeTimeRef = useRef(null);
+
+      const focusInput = useCallback(() => {
+        if (inputRef.current && !isFinishedRef.current) {
+          inputRef.current.focus({ preventScroll: true });
+        }
+      }, []);
+
+      useEffect(() => {
+        if (gameState !== 'PLAYING') return;
+
+        isFinishedRef.current = false;
+        setInputValue('');
+        setHasTypo(false);
+        setTypoCount(0);
+        setFeedbackEffect(null);
+        firstKeystrokeTimeRef.current = null;
+        lastKeystrokeTimeRef.current = null;
+
+        focusInput();
+        const t1 = setTimeout(focusInput, 50);
+        const t2 = setTimeout(focusInput, 200);
+
+        return () => {
+          clearTimeout(t1);
+          clearTimeout(t2);
+        };
+      }, [currentWord, gameState, focusInput]);
+
+      useEffect(() => {
+        if (gameState !== 'PLAYING') return;
+
+        const handleGlobalKeyDown = (e) => {
+          if (isFinishedRef.current) return;
+          if (e.ctrlKey || e.metaKey || e.altKey) return;
+          if (e.key === 'Tab' || e.key === 'Escape') return;
+
+          const activeEl = document.activeElement;
+          if (activeEl === inputRef.current) return;
+
+          focusInput();
+        };
+
+        const handleGlobalPointerDown = (e) => {
+          if (isFinishedRef.current) return;
+          const target = e.target;
+          if (
+            target?.closest('button') ||
+            target?.closest('a') ||
+            target?.closest('input') ||
+            target?.closest('[role="button"]')
+          ) {
+            return;
+          }
+          focusInput();
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        window.addEventListener('pointerdown', handleGlobalPointerDown);
+
+        return () => {
+          window.removeEventListener('keydown', handleGlobalKeyDown);
+          window.removeEventListener('pointerdown', handleGlobalPointerDown);
+        };
+      }, [gameState, focusInput]);
+
+      const handleFinishWord = (userInput) => {
+        if (isFinishedRef.current) return;
+
+        const trimmed = userInput.trim();
+        if (trimmed !== currentWord.name) return;
+
+        isFinishedRef.current = true;
+
+        const firstTime = firstKeystrokeTimeRef.current;
+        const lastTime = lastKeystrokeTimeRef.current || performance.now();
+
+        let durationSec;
+        if (firstTime && lastTime > firstTime) {
+          durationSec = Math.max(0.25, (lastTime - firstTime) / 1000);
+        } else {
+          durationSec = 0.6;
+        }
+
+        const strokes = currentWord.strokeCount;
+        const wordCpm = calculateCPM(strokes, durationSec);
+        const isPerfect = typoCount === 0;
+
+        if (isPerfect) {
+          sound.playWordSuccess();
+          setFeedbackEffect('perfect');
+        } else {
+          sound.playKeyTap();
+          setFeedbackEffect('has_typo');
+        }
+
+        setTimeout(() => {
+          onWordComplete(currentWord, wordCpm, durationSec, isPerfect, typoCount);
+        }, 350);
+      };
+
+      const handleChange = (e) => {
+        if (isFinishedRef.current) return;
+
+        const value = e.target.value;
+        const target = currentWord.name;
+        const now = performance.now();
+
+        if (!firstKeystrokeTimeRef.current && value.length > 0) {
+          firstKeystrokeTimeRef.current = now;
+        }
+        lastKeystrokeTimeRef.current = now;
+
+        sound.playKeyTap();
+
+        const isValidPrefix = isHangulPrefixMatch(value, target);
+
+        let currentTypos = typoCount;
+        if (!isValidPrefix && value.length > 0) {
+          if (!hasTypo || value.length > inputValue.length) {
+            currentTypos = typoCount + 1;
+            setTypoCount(currentTypos);
+            sound.playTypo();
+          }
+          setHasTypo(true);
+        } else {
+          setHasTypo(false);
+        }
+
+        setInputValue(value);
+
+        const typedStrokes = countKeystrokes(value);
+        const firstTime = firstKeystrokeTimeRef.current;
+        if (firstTime && value.length > 0) {
+          const elapsed = Math.max(0.15, (now - firstTime) / 1000);
+          const liveCpm = calculateCPM(typedStrokes, elapsed);
+          onLiveCpmUpdate(liveCpm, currentTypos, typedStrokes);
+        } else {
+          onLiveCpmUpdate(0, currentTypos, typedStrokes);
+        }
+      };
+
+      const handleKeyDown = (e) => {
+        if (isFinishedRef.current) return;
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const currentVal = (e.currentTarget.value || inputValue).trim();
+          if (currentVal === currentWord.name) {
+            handleFinishWord(currentVal);
+          } else if (currentVal.length > 0) {
+            if (!isHangulPrefixMatch(currentVal, currentWord.name)) {
+              setHasTypo(true);
+              const newTypos = typoCount + 1;
+              setTypoCount(newTypos);
+              onLiveCpmUpdate(0, newTypos, countKeystrokes(currentVal));
+              sound.playTypo();
+            }
+          }
+        }
+      };
+
+      const targetChars = currentWord.name.split('');
+
+      return (
+        <div
+          onClick={focusInput}
+          className={`relative w-full h-full flex flex-col items-center justify-between p-4 sm:p-5 text-center select-none cursor-text transition-all ${
+            hasTypo
+              ? 'bg-red-50/20'
+              : feedbackEffect === 'perfect'
+              ? 'bg-emerald-50/20'
+              : ''
+          }`}
+        >
+          {/* Top category row */}
+          <div className="w-full flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-1.5">
+              <span className="bg-amber-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
+                {currentWord.category}
+              </span>
+              <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-bold px-2 py-0.5 rounded-full shadow-xs font-['Outfit',sans-serif]">
+                총 {currentWord.strokeCount}타
+              </span>
+              <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-2xs font-['Jua',sans-serif]">
+                🎲 랜덤
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold font-['Outfit',sans-serif] bg-amber-50 border border-amber-200">
+              {typoCount === 0 ? (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-emerald-700">오타 0개</span>
+                </>
+              ) : (
+                <>
+                  <ShieldAlert className="w-3.5 h-3.5 text-red-500" />
+                  <span className="text-red-600">오타 {typoCount}회</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Cartoon Food Illustration */}
+          <div className="relative my-auto shrink-0 flex items-center justify-center">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-amber-50/80 border border-amber-200/60 p-2.5 flex items-center justify-center shadow-xs transition-transform hover:scale-105">
+              <FoodIllustration id={currentWord.id} name={currentWord.name} size="lg" />
+            </div>
+          </div>
+
+          {/* Target Word Display */}
+          <div className="shrink-0 my-1">
+            <div className="flex items-center justify-center gap-2 sm:gap-2.5 text-3xl sm:text-5xl font-black tracking-wider font-['Jua',sans-serif]">
+              {targetChars.map((char, idx) => {
+                const isTyped = idx < inputValue.length;
+                const isCurrent = idx === inputValue.length;
+                const typedChar = inputValue[idx] || '';
+                const isMatch = typedChar === char;
+
+                let colorStyle = 'text-amber-950/25';
+                if (isTyped) {
+                  colorStyle = isMatch ? 'text-emerald-600' : 'text-red-500 underline decoration-wavy';
+                } else if (isCurrent) {
+                  colorStyle = 'text-amber-950';
+                }
+
+                return (
+                  <span
+                    key={idx}
+                    className={`relative px-2 py-0.5 rounded-xl transition-all duration-150 ${colorStyle} ${
+                      isCurrent ? 'bg-amber-100/70 border-b-3 border-amber-500 scale-105' : ''
+                    }`}
+                  >
+                    {char}
+                  </span>
+                );
+              })}
+            </div>
+
+            <div className="mt-1 text-[11px] sm:text-xs text-amber-900/60 font-medium">
+              <span>{currentWord.englishName}</span>
+              <span className="mx-1.5">·</span>
+              <span>{currentWord.description}</span>
+            </div>
+          </div>
+
+          {/* Responsive Typing Input */}
+          <div className="w-full max-w-sm shrink-0 relative mt-1">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              disabled={isFinishedRef.current}
+              placeholder="단어를 입력하고 Enter를 누르세요..."
+              className={`w-full px-4 py-2.5 sm:py-3 text-center text-lg sm:text-xl font-bold text-amber-950 bg-amber-50/60 border-2 rounded-2xl focus:outline-none transition-all font-['Jua',sans-serif] caret-amber-700 cursor-text ${
+                inputValue.trim() === currentWord.name
+                  ? 'border-emerald-500 ring-4 ring-emerald-200/60 bg-emerald-50/40 animate-pulse'
+                  : 'border-amber-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-200/50'
+              }`}
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+            />
+
+            <div
+              className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg transition-all ${
+                inputValue.trim() === currentWord.name
+                  ? 'bg-emerald-600 text-white shadow-sm scale-105 animate-bounce'
+                  : 'text-amber-800/60 bg-amber-100 hidden sm:flex'
+              }`}
+            >
+              <CornerDownLeft className="w-3 h-3" />
+              <span>{inputValue.trim() === currentWord.name ? 'Enter!' : 'Enter'}</span>
+            </div>
+          </div>
+
+          {/* Feedback Banner */}
+          <div className="h-6 mt-1 flex items-center justify-center text-[11px] font-semibold shrink-0">
+            {feedbackEffect === 'perfect' && (
+              <div className="flex items-center gap-1 text-emerald-600 animate-bounce">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>오타 없이 완벽 입력! +1점 획득 🎉</span>
+              </div>
+            )}
+            {feedbackEffect === 'has_typo' && (
+              <div className="flex items-center gap-1 text-amber-700">
+                <span>입력 완료! (오타 {typoCount}회로 점수 미부여)</span>
+              </div>
+            )}
+            {!feedbackEffect && hasTypo && (
+              <div className="flex items-center gap-1 text-red-500">
+                <AlertCircle className="w-3 h-3" />
+                <span>오타 발생! 백스페이스(Backspace)로 수정하세요.</span>
+              </div>
+            )}
+            {!feedbackEffect && !hasTypo && inputValue.trim() === currentWord.name && (
+              <div className="flex items-center gap-1 text-emerald-700 font-bold animate-pulse">
+                <CornerDownLeft className="w-3.5 h-3.5 text-emerald-600" />
+                <span>단어 완성! [Enter] 키를 누르면 다음 단어로 넘어갑니다.</span>
+              </div>
+            )}
+            {!feedbackEffect && !hasTypo && inputValue.trim() !== currentWord.name && (
+              <span className="text-amber-900/40">
+                입력 완료 후 [Enter]를 누르면 타속과 타수가 확정됩니다
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 10. COLLECTED FOODS TRAY COMPONENT
+    // ==========================================
+    const CollectedFoodsTray = ({ collectedWords, allFoods }) => {
+      const [selectedWord, setSelectedWord] = useState(null);
+      const all15Foods = allFoods && allFoods.length > 0 ? allFoods : FOOD_WORDS.slice(0, 15);
+
+      return (
+        <div className="w-full h-full flex flex-col bg-white rounded-2xl border border-amber-200/80 shadow-xs p-3 sm:p-4 overflow-hidden">
+          <div className="flex items-center justify-between gap-2 pb-2.5 mb-2 border-b border-amber-100 shrink-0">
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700">
+                <Utensils className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-sm sm:text-base font-bold text-amber-950 font-['Jua',sans-serif]">
+                디즈니 음식 컬렉션
+              </h3>
+            </div>
+
+            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 font-['Outfit',sans-serif]">
+              {collectedWords.length} / 15 완성
+            </span>
+          </div>
+
+          <div className="flex-1 grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-3 gap-1.5 min-h-0 overflow-y-auto pr-0.5">
+            {all15Foods.map((food, idx) => {
+              const record = collectedWords.find((w) => w.word.id === food.id);
+              const isCollected = !!record;
+
+              return (
+                <div
+                  key={food.id}
+                  onClick={() => {
+                    if (record) setSelectedWord(record);
+                  }}
+                  className={`relative rounded-xl border p-1.5 flex flex-col items-center justify-between text-center transition-all ${
+                    isCollected
+                      ? 'bg-amber-50/70 border-amber-300 hover:bg-amber-100/60 hover:shadow-xs cursor-pointer group scale-100'
+                      : 'bg-slate-50/50 border-dashed border-slate-200/80 opacity-55'
+                  }`}
+                >
+                  <div className="w-full flex items-center justify-between text-[9px] text-amber-900/40 font-['Outfit',sans-serif] leading-none mb-0.5">
+                    <span>#{idx + 1}</span>
+                    <span>{food.stage}단계</span>
+                  </div>
+
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center my-0.5 transition-transform group-hover:scale-105">
+                    {isCollected ? (
+                      <FoodIllustration id={food.id} name={food.name} size="sm" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-400 text-xs font-bold">
+                        ?
+                      </div>
+                    )}
+                  </div>
+
+                  <span className={`text-[11px] font-bold truncate max-w-full font-['Jua',sans-serif] ${isCollected ? 'text-amber-950' : 'text-slate-400'}`}>
+                    {food.name}
+                  </span>
+
+                  {isCollected && record ? (
+                    <div className="flex items-center gap-0.5 text-[9px] font-bold text-amber-700 bg-amber-100/90 px-1.5 py-0.2 rounded font-['Outfit',sans-serif] mt-0.5">
+                      <Zap className="w-2.5 h-2.5" />
+                      <span>{record.cpm}타</span>
+                    </div>
+                  ) : (
+                    <span className="text-[9px] text-slate-400 font-sans mt-0.5">미완성</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {selectedWord && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-3xl max-w-sm w-full p-6 border-2 border-amber-300 shadow-xl relative animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  onClick={() => setSelectedWord(null)}
+                  className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-28 h-28 bg-amber-50 rounded-2xl border border-amber-200 p-2 flex items-center justify-center mb-3">
+                    <FoodIllustration id={selectedWord.word.id} name={selectedWord.word.name} size="lg" />
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                      {selectedWord.word.category}
+                    </span>
+                    <span className="text-xs text-amber-800/60 font-medium">
+                      {selectedWord.stage}단계 요리
+                    </span>
+                  </div>
+
+                  <h4 className="text-2xl font-black text-amber-950 font-['Jua',sans-serif]">
+                    {selectedWord.word.name}
+                  </h4>
+                  <p className="text-xs text-slate-500 mb-3">{selectedWord.word.englishName}</p>
+
+                  <p className="text-sm text-amber-950/80 bg-amber-50/80 p-3 rounded-xl border border-amber-100 mb-4">
+                    {selectedWord.word.description}
+                  </p>
+
+                  <div className="w-full grid grid-cols-3 gap-2 text-center text-xs font-['Outfit',sans-serif]">
+                    <div className="p-2 rounded-xl bg-amber-50/70 border border-amber-200/50">
+                      <span className="text-amber-800/60 text-[10px] block font-sans">타자 속도</span>
+                      <span className="text-sm font-bold text-amber-950">{selectedWord.cpm}타</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-amber-50/70 border border-amber-200/50">
+                      <span className="text-amber-800/60 text-[10px] block font-sans">오타 수</span>
+                      <span className={`text-sm font-bold ${selectedWord.typoCount > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                        {selectedWord.typoCount}회
+                      </span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-amber-50/70 border border-amber-200/50">
+                      <span className="text-amber-800/60 text-[10px] block font-sans">점수</span>
+                      <span className="text-sm font-bold text-emerald-600">
+                        {selectedWord.perfect ? '+1점' : '0점'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedWord(null)}
+                    className="w-full mt-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm transition-colors cursor-pointer"
+                  >
+                    닫기
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 11. STAGE CLEAR MODAL COMPONENT
+    // ==========================================
+    const StageClearModal = ({
+      stage,
+      stageWords,
+      stageScore,
+      stageTypos,
+      averageCpm,
+      onNextStage,
+    }) => {
+      const currentConfig = STAGE_CONFIGS.find((s) => s.stage === stage) || STAGE_CONFIGS[0];
+      const nextConfig = STAGE_CONFIGS.find((s) => s.stage === stage + 1);
+
+      useEffect(() => {
+        sound.playStageClear();
+      }, []);
+
+      return (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border-2 border-amber-300 shadow-xl text-center relative animate-in fade-in zoom-in-95 duration-150">
+            <span className="text-4xl block mb-2">🎉</span>
+            <span className="text-xs font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full uppercase tracking-wider">
+              Stage {stage} Complete
+            </span>
+
+            <h3 className="text-2xl sm:text-3xl font-black text-amber-950 font-['Jua',sans-serif] mt-2 mb-1">
+              {currentConfig.title} 완료!
+            </h3>
+            <p className="text-xs sm:text-sm text-amber-900/70 mb-5">
+              3가지 음식을 모두 맛있게 완성했습니다.
+            </p>
+
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6 font-['Outfit',sans-serif]">
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+                <div className="flex items-center justify-center gap-1 text-amber-700 mb-0.5">
+                  <Award className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold font-sans">획득 점수</span>
+                </div>
+                <span className="text-lg sm:text-xl font-bold text-amber-950">{stageScore} / 3점</span>
+              </div>
+
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+                <div className="flex items-center justify-center gap-1 text-amber-700 mb-0.5">
+                  <Zap className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold font-sans">평균 타속</span>
+                </div>
+                <span className="text-lg sm:text-xl font-bold text-amber-950">{averageCpm}타/분</span>
+              </div>
+
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+                <div className="flex items-center justify-center gap-1 text-red-500 mb-0.5">
+                  <span className="text-xs font-bold font-sans">발생 오타</span>
+                </div>
+                <span className={`text-lg sm:text-xl font-bold ${stageTypos > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  {stageTypos}회
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-amber-50/60 rounded-2xl p-4 border border-amber-200/60 mb-6">
+              <span className="text-xs font-bold text-amber-950/80 block mb-3 font-['Jua',sans-serif]">
+                완성한 {stage}단계 음식 3가지
+              </span>
+              <div className="flex justify-center items-center gap-4">
+                {stageWords.map((rec, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center gap-1 bg-white rounded-xl border border-amber-200 p-2.5 shadow-2xs"
+                    title={rec.word.name}
+                  >
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      <FoodIllustration id={rec.word.id} size="md" />
+                    </div>
+                    <span className="text-xs font-bold text-amber-950 font-['Jua',sans-serif]">{rec.word.name}</span>
+                    <span className="text-[10px] text-amber-800/70">{rec.cpm}타</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={onNextStage}
+              className="w-full py-3.5 px-6 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-base flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer font-['Jua',sans-serif]"
+              autoFocus
+            >
+              <span>{nextConfig ? `${nextConfig.stage}단계 시작하기` : '다음 단계로'}</span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 12. RANKING BOARD MODAL (명예의 전당)
+    // ==========================================
+    const RankingBoardModal = ({ onClose, highlightRecord, onClearRankings }) => {
+      const [rankings, setRankings] = useState(() => getHallOfFameRanking(highlightRecord));
+      const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
+      const [downloadSuccess, setDownloadSuccess] = useState(false);
+
+      const handleConfirmClear = () => {
+        clearTypingRanking();
+        setRankings([]);
+        setIsConfirmClearOpen(false);
+        if (onClearRankings) {
+          onClearRankings();
+        }
+      };
+
+      const handleDownloadJson = () => {
+        const res = downloadTypingRankingsAsJson();
+        if (res.success) {
+          setDownloadSuccess(true);
+          setTimeout(() => {
+            setDownloadSuccess(false);
+          }, 2500);
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col border-4 border-amber-300 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-5 sm:p-6 border-b border-amber-200/80 bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 text-white flex items-center justify-between shrink-0 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs text-white flex items-center justify-center shadow-xs border border-white/30">
+                  <Trophy className="w-6 h-6 text-yellow-200 animate-bounce" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-black font-['Jua',sans-serif] tracking-tight">
+                    🏆 명예의 전당 (TOP 10 랭킹)
+                  </h2>
+                  <p className="text-xs text-amber-100 font-medium">
+                    평균 타속 및 점수 순 (최대 10명 유지) · 오타 없이 빠를수록 높은 랭크!
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
+                aria-label="닫기"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Column Headers */}
+            <div className="px-5 py-2.5 bg-amber-50/90 border-b border-amber-200/80 text-xs font-bold text-amber-900/80 flex items-center justify-between shrink-0 font-['Jua',sans-serif]">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="w-12 text-center">순위</span>
+                <span>이름</span>
+              </div>
+              <div className="flex items-center gap-2.5 sm:gap-4 pr-1">
+                <span className="text-amber-900">점수</span>
+                <span className="text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded font-black">
+                  평균 타속
+                </span>
+                <span>오타</span>
+                <span className="hidden sm:inline">날짜</span>
+              </div>
+            </div>
+
+            {/* Ranking List Table */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-2">
+              {rankings.length === 0 ? (
+                <div className="text-center py-16 px-4 flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mb-4 text-amber-600 border-2 border-amber-200 shadow-xs">
+                    <Award className="w-8 h-8" />
+                  </div>
+                  <p className="text-amber-950 font-black text-lg sm:text-xl font-['Jua',sans-serif] whitespace-pre-line leading-relaxed">
+                    {"아직 기록이 없어요.\n첫 번째 주인공이 되어 보세요!"}
+                  </p>
+                </div>
+              ) : (
+                rankings.map((entry, idx) => {
+                  const isHighlight = entry.isNew;
+
+                  return (
+                    <div
+                      key={`${entry.date}-${entry.name}-${idx}`}
+                      className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border transition-all ${
+                        isHighlight
+                          ? 'bg-yellow-100 border-2 border-yellow-400 ring-2 ring-yellow-300 shadow-md scale-[1.01]'
+                          : entry.rank === 1
+                          ? 'bg-amber-50/90 border-amber-300 shadow-2xs'
+                          : entry.rank <= 3
+                          ? 'bg-amber-50/60 border-amber-200'
+                          : 'bg-white border-slate-200/90 hover:bg-amber-50/30'
+                      }`}
+                    >
+                      {/* Left */}
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <div className="w-12 flex items-center justify-center">
+                          <span
+                            className={`text-sm sm:text-base font-black px-2 py-0.5 rounded-full font-['Jua',sans-serif] ${
+                              entry.rank === 1
+                                ? 'bg-amber-400 text-amber-950 shadow-xs border border-amber-300'
+                                : entry.rank === 2
+                                ? 'bg-slate-200 text-slate-800 shadow-xs border border-slate-300'
+                                : entry.rank === 3
+                                ? 'bg-amber-700 text-amber-100 shadow-xs border border-amber-600'
+                                : 'bg-amber-100/70 text-amber-900'
+                            }`}
+                          >
+                            {entry.rankBadge}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-base sm:text-lg font-black text-amber-950 font-['Jua',sans-serif]">
+                            {entry.name}
+                          </span>
+                          {isHighlight && (
+                            <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-xs animate-bounce font-sans">
+                              <Sparkles className="w-2.5 h-2.5 text-yellow-200" />
+                              New
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right */}
+                      <div className="flex items-center gap-2.5 sm:gap-4 text-right font-['Outfit',sans-serif]">
+                        <div className="bg-amber-50 border border-amber-200 px-2 py-1 rounded-xl">
+                          <span className="text-sm sm:text-base font-black text-amber-950 tabular-nums">
+                            {entry.score}
+                          </span>
+                          <span className="text-[10px] text-amber-800 font-bold ml-0.5">점</span>
+                        </div>
+
+                        <div
+                          className="flex items-center gap-1 bg-amber-100/90 px-2 sm:px-2.5 py-1 rounded-xl border border-amber-300/80 shadow-2xs"
+                          title={`평균 타속: ${entry.cpm}타/분`}
+                        >
+                          <Zap className="w-3.5 h-3.5 text-amber-600" />
+                          <span className="text-sm sm:text-base font-black text-amber-950 tabular-nums">
+                            {entry.cpm}
+                          </span>
+                          <span className="text-[10px] text-amber-800 font-bold">타/분</span>
+                        </div>
+
+                        <div className="flex items-center gap-0.5 text-xs font-bold">
+                          {entry.typos === 0 ? (
+                            <span className="text-emerald-700 flex items-center gap-0.5 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md border border-emerald-200">
+                              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                              0개
+                            </span>
+                          ) : (
+                            <span className="text-red-600 flex items-center gap-0.5 bg-red-50 px-1.5 sm:px-2 py-0.5 rounded-md border border-red-200">
+                              <ShieldAlert className="w-3 h-3 text-red-500" />
+                              {entry.typos}회
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-[11px] text-amber-900/60 font-medium hidden sm:flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-amber-600" />
+                          <span>{entry.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-3.5 sm:p-4 border-t border-amber-200/80 bg-amber-50/70 flex flex-wrap items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmClearOpen(true)}
+                  disabled={rankings.length === 0}
+                  className="px-3 sm:px-3.5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed font-['Jua',sans-serif]"
+                  title="모든 랭킹 기록 삭제"
+                >
+                  <Trash2 className="w-4 h-4 shrink-0" />
+                  <span>전체 기록 지우기</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadJson}
+                  disabled={rankings.length === 0}
+                  className={`px-3 sm:px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed font-['Jua',sans-serif] ${
+                    downloadSuccess
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white'
+                  }`}
+                  title="typingRanking 데이터를 JSON 파일로 다운로드"
+                >
+                  {downloadSuccess ? (
+                    <>
+                      <Check className="w-4 h-4 shrink-0 text-white" />
+                      <span>다운로드 완료!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 shrink-0 text-white" />
+                      <span>기록 다운로드</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 sm:px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-xs transition-colors cursor-pointer font-['Jua',sans-serif]"
+              >
+                닫기
+              </button>
+            </div>
+
+            {/* Clear Confirmation Modal */}
+            {isConfirmClearOpen && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+                <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full border-4 border-red-300 shadow-2xl text-center animate-in zoom-in-95 duration-150">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-red-100 flex items-center justify-center text-red-600 shadow-xs border border-red-200">
+                    <Trash2 className="w-7 h-7 text-red-600 animate-pulse" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 font-['Jua',sans-serif] mb-2">
+                    기록 삭제 확인
+                  </h3>
+                  <p className="text-base text-slate-700 font-bold whitespace-pre-line mb-6 font-['Jua',sans-serif] leading-relaxed">
+                    모든 기록이 사라집니다. 정말 지울까요?
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmClearOpen(false)}
+                      className="flex-1 py-3 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-sm font-['Jua',sans-serif] transition-colors cursor-pointer"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmClear}
+                      className="flex-1 py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm font-['Jua',sans-serif] transition-colors shadow-sm cursor-pointer"
+                    >
+                      지우기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 13. PRAISE STAMP MODAL (참 잘했어요 결과 화면)
+    // ==========================================
+    const PraiseStampModal = ({ stats, collectedWords, onRestart }) => {
+      const [nameInput, setNameInput] = useState('');
+      const [errorMessage, setErrorMessage] = useState('');
+      const [isSaved, setIsSaved] = useState(false);
+      const [savedRecord, setSavedRecord] = useState(null);
+      const [isHallOfFameOpen, setIsHallOfFameOpen] = useState(false);
+      const [refreshTrigger, setRefreshTrigger] = useState(0);
+      const nameInputRef = useRef(null);
+
+      const potentialRankInfo = useMemo(() => {
+        return calculatePotentialRank(stats.score, stats.averageCpm, stats.totalTypoCount);
+      }, [stats.score, stats.averageCpm, stats.totalTypoCount]);
+
+      const hallOfFameList = useMemo(() => {
+        return getHallOfFameRanking(savedRecord);
+      }, [savedRecord, refreshTrigger]);
+
+      useEffect(() => {
+        sound.playPraiseStamp();
+
+        if (typeof confetti === 'function') {
+          const duration = 3.5 * 1000;
+          const animationEnd = Date.now() + duration;
+
+          const frame = () => {
+            confetti({
+              particleCount: 5,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0 },
+              colors: ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#ec4899'],
+            });
+            confetti({
+              particleCount: 5,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1 },
+              colors: ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#ec4899'],
+            });
+
+            if (Date.now() < animationEnd) {
+              requestAnimationFrame(frame);
+            }
+          };
+          frame();
+        }
+
+        const t = setTimeout(() => {
+          nameInputRef.current?.focus();
+        }, 400);
+        return () => clearTimeout(t);
+      }, []);
+
+      const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}분 ${secs}초`;
+      };
+
+      const handleNameChange = (e) => {
+        if (isSaved) return;
+        const val = e.target.value;
+        if (val.length <= 8) {
+          setNameInput(val);
+          if (errorMessage) {
+            setErrorMessage('');
+          }
+        }
+      };
+
+      const handleSaveRecord = () => {
+        if (isSaved) return;
+
+        const trimmed = nameInput.trim();
+        if (!trimmed) {
+          setErrorMessage('이름을 입력 해 주세요');
+          nameInputRef.current?.focus();
+          sound.playTypo();
+          return;
+        }
+
+        const { record } = saveToTypingRanking(
+          trimmed,
+          stats.score,
+          stats.averageCpm,
+          stats.totalTypoCount
+        );
+
+        sound.playStageClear();
+        setIsSaved(true);
+        setSavedRecord(record);
+        setRefreshTrigger((prev) => prev + 1);
+      };
+
+      const handleKeyDown = (e) => {
+        if (isSaved) return;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSaveRecord();
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 border-4 border-amber-300 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 duration-200">
+            {/* Top Trophy Showcase */}
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-3">
+                <div className="w-36 h-36 sm:w-44 sm:h-44 relative transform transition-transform animate-[bounce_1s_ease-out_1] flex items-center justify-center">
+                  <img
+                    src="../src/assets/images/cartoon_trophy_stamp_1792988625540.jpg"
+                    alt="참잘했어요 트로피 도장"
+                    className="w-full h-full object-contain drop-shadow-xl"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.parentElement.querySelector('.trophy-svg-fallback');
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  {/* Visual SVG Trophy Fallback */}
+                  <div className="trophy-svg-fallback hidden w-full h-full items-center justify-center flex-col">
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 border-4 border-amber-600 flex items-center justify-center shadow-lg">
+                      <Trophy className="w-16 h-16 text-amber-950" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute -top-1 -right-4 bg-amber-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md animate-pulse">
+                  5단계 ALL CLEAR!
+                </div>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black text-amber-950 font-['Jua',sans-serif] tracking-tight">
+                참 잘했어요!
+              </h2>
+              <p className="text-sm sm:text-base text-amber-900/80 font-medium mt-1">
+                5단계 총 15가지 맛있는 음식 단어를 모두 완성하셨습니다!
+              </p>
+            </div>
+
+            {/* Score & Telemetry Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5 font-['Outfit',sans-serif]">
+              <div className="bg-amber-100/80 rounded-2xl p-3 sm:p-3.5 border-2 border-amber-300 text-center shadow-xs">
+                <div className="flex items-center justify-center text-amber-700 mb-1">
+                  <Zap className="w-5 h-5 text-amber-600 animate-pulse" />
+                </div>
+                <span className="text-[11px] text-amber-900 font-bold font-sans block">
+                  평균 타자 속도 (랭킹 기준)
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-amber-950 tabular-nums">
+                  {stats.averageCpm} <span className="text-xs font-normal text-amber-800">타/분</span>
+                </span>
+              </div>
+
+              <div className="bg-amber-50 rounded-2xl p-3 sm:p-3.5 border border-amber-200 text-center">
+                <div className="flex items-center justify-center text-red-500 mb-1">
+                  <span className="text-xs font-bold font-sans">총 오타 수</span>
+                </div>
+                <span
+                  className={`text-xl sm:text-2xl font-black tabular-nums ${
+                    stats.totalTypoCount > 0 ? 'text-red-600' : 'text-emerald-600'
+                  }`}
+                >
+                  {stats.totalTypoCount}회
+                </span>
+              </div>
+
+              <div className="bg-amber-50 rounded-2xl p-3 sm:p-3.5 border border-amber-200 text-center">
+                <div className="flex items-center justify-center text-emerald-600 mb-1">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <span className="text-[11px] text-amber-900/60 font-sans block">정확도</span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-600 tabular-nums">
+                  {stats.accuracy}%
+                </span>
+              </div>
+
+              <div className="bg-amber-50 rounded-2xl p-3 sm:p-3.5 border border-amber-200 text-center">
+                <div className="flex items-center justify-center text-amber-700 mb-1">
+                  <Award className="w-5 h-5" />
+                </div>
+                <span className="text-[11px] text-amber-900/60 font-sans block">완벽 단어 점수</span>
+                <span className="text-xl sm:text-2xl font-black text-amber-950 tabular-nums">
+                  {stats.score} <span className="text-xs font-normal text-amber-800">/ 15점</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Time & Hall of Fame Button */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 mb-5 bg-amber-50/80 p-3 rounded-2xl border border-amber-200">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-900/70">
+                <Clock className="w-4 h-4 text-amber-700" />
+                <span>총 소요 시간: {formatTime(stats.elapsedSeconds)}</span>
+              </div>
+
+              <button
+                onClick={() => setIsHallOfFameOpen(true)}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs sm:text-sm font-['Jua',sans-serif] flex items-center justify-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer"
+                title="명예의 전당 순위표 보기"
+              >
+                <Trophy className="w-4 h-4 text-yellow-200 animate-bounce" />
+                <span>🏆 명예의 전당 순위표 보기</span>
+              </button>
+            </div>
+
+            {/* Record Saving & Rank Preview */}
+            <div className="bg-amber-100/70 rounded-3xl p-5 sm:p-6 border-2 border-amber-300 shadow-xs mb-6 text-center">
+              <div className="mb-4 flex flex-col items-center">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 text-white px-5 py-2 sm:py-2.5 rounded-2xl shadow-md border-2 border-amber-300">
+                  <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-200 animate-bounce" />
+                  <span className="text-xl sm:text-2xl font-black font-['Jua',sans-serif]">
+                    {isSaved
+                      ? `🎉 랭킹 기록 등록 완료!`
+                      : `현재 나의 예상 랭킹: ${potentialRankInfo.rankBadge}! (${stats.averageCpm}타/분)`}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs sm:text-sm font-bold text-amber-950 font-['Jua',sans-serif]">
+                  {isSaved
+                    ? `${nameInput}님의 기록이 'typingRanking'에 저장되었습니다!`
+                    : potentialRankInfo.rank === 1
+                    ? `🥇 최고 타속 1위 달성! (${stats.averageCpm}타/분, 오타 ${stats.totalTypoCount}회) 이름을 남겨보세요!`
+                    : `평균 ${stats.averageCpm}타/분(오타 ${stats.totalTypoCount}회)으로 ${potentialRankInfo.rankBadge}에 진입합니다!`}
+                </p>
+              </div>
+
+              {/* Large Name Input */}
+              <div className="max-w-md mx-auto mb-3">
+                <div className="relative">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={nameInput}
+                    onChange={handleNameChange}
+                    onKeyDown={handleKeyDown}
+                    maxLength={8}
+                    disabled={isSaved}
+                    placeholder={isSaved ? nameInput : '이름 입력 (최대 8자)'}
+                    className={`w-full text-center text-xl sm:text-2xl font-bold py-3.5 sm:py-4 px-5 rounded-2xl border-2 font-['Jua',sans-serif] shadow-sm caret-amber-700 transition-all ${
+                      isSaved
+                        ? 'bg-slate-100 border-slate-300 text-slate-500 cursor-not-allowed'
+                        : 'border-amber-400 bg-white text-amber-950 placeholder:text-amber-800/40 focus:outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-200/60'
+                    }`}
+                    autoFocus
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs sm:text-sm font-bold text-amber-800/50 pointer-events-none font-['Outfit',sans-serif]">
+                    {nameInput.length}/8
+                  </span>
+                </div>
+
+                {errorMessage && !isSaved && (
+                  <div className="mt-2.5 flex items-center justify-center gap-1.5 text-base sm:text-lg font-bold text-red-600 animate-bounce">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
+                {isSaved && (
+                  <div className="mt-3.5 py-2.5 px-4 bg-emerald-100/95 border-2 border-emerald-500 rounded-2xl text-emerald-800 font-black text-xl sm:text-2xl font-['Jua',sans-serif] flex items-center justify-center gap-2 animate-bounce shadow-xs">
+                    <Sparkles className="w-6 h-6 text-emerald-600" />
+                    <span>기록했어요! 🎉</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-lg mx-auto mt-4">
+                <button
+                  onClick={handleSaveRecord}
+                  disabled={isSaved}
+                  className={`w-full sm:flex-1 py-3.5 sm:py-4 px-6 rounded-2xl font-black text-lg sm:text-xl font-['Jua',sans-serif] flex items-center justify-center gap-2 transition-all ${
+                    isSaved
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none opacity-80'
+                      : 'bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-md hover:shadow-lg cursor-pointer'
+                  }`}
+                  title={isSaved ? '이미 기록이 저장되었습니다' : '기록 남기기'}
+                >
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                  <span>{isSaved ? '기록 완료' : '기록 남기기'}</span>
+                </button>
+
+                <button
+                  onClick={onRestart}
+                  className="w-full sm:flex-1 py-3.5 sm:py-4 px-6 rounded-2xl bg-amber-50 hover:bg-amber-200/80 active:scale-[0.98] text-amber-950 font-black text-lg sm:text-xl font-['Jua',sans-serif] flex items-center justify-center gap-2 border-2 border-amber-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                  <span>{isSaved ? '새 게임 시작하기' : '기록 안 남기고 다시 하기'}</span>
+                </button>
+              </div>
+
+              {/* TOP 10 Mini Preview */}
+              <div className="w-full max-w-lg mt-6 bg-white/95 rounded-2xl border-2 border-amber-300/80 p-3.5 text-left shadow-2xs mx-auto">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-200/80">
+                  <span className="text-sm font-bold text-amber-950 font-['Jua',sans-serif] flex items-center gap-1.5">
+                    <Trophy className="w-4 h-4 text-amber-600" />
+                    <span>🏆 명예의 전당 TOP 10 (평균 타속 기준)</span>
+                  </span>
+                  <button
+                    onClick={() => setIsHallOfFameOpen(true)}
+                    className="text-xs font-bold text-amber-800 hover:text-amber-950 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer font-['Jua',sans-serif]"
+                  >
+                    큰 창으로 보기 →
+                  </button>
+                </div>
+
+                {hallOfFameList.length === 0 ? (
+                  <div className="py-6 px-4 text-center">
+                    <p className="text-amber-950/70 font-bold text-sm font-['Jua',sans-serif] whitespace-pre-line leading-relaxed">
+                      {"아직 기록이 없어요.\n첫 번째 주인공이 되어 보세요!"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                    {hallOfFameList.map((entry, idx) => {
+                      const isHighlight = entry.isNew;
+
+                      return (
+                        <div
+                          key={`${entry.date}-${entry.name}-${idx}`}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm transition-all ${
+                            isHighlight
+                              ? 'bg-yellow-100 border-2 border-yellow-400 ring-2 ring-yellow-300 font-bold shadow-xs'
+                              : entry.rank === 1
+                              ? 'bg-amber-50/90 border border-amber-300'
+                              : entry.rank <= 3
+                              ? 'bg-amber-50/60 border border-amber-200'
+                              : 'bg-amber-50/30 text-slate-800 border border-slate-200/60'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 sm:gap-2.5">
+                            <span className="text-xs sm:text-sm font-black text-amber-950 font-['Jua',sans-serif] w-12 text-center">
+                              {entry.rankBadge}
+                            </span>
+                            <span className="text-amber-950 font-['Jua',sans-serif] text-sm sm:text-base">
+                              {entry.name}
+                            </span>
+                            {isHighlight && (
+                              <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-xs animate-bounce font-sans">
+                                <Sparkles className="w-2.5 h-2.5 text-yellow-200" />
+                                New
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2.5 sm:gap-3 font-['Outfit',sans-serif]">
+                            <div
+                              className="flex items-center gap-1 bg-amber-100/90 px-2 py-0.5 rounded-lg border border-amber-300/80"
+                              title={`평균 타속: ${entry.cpm}타/분`}
+                            >
+                              <Zap className="w-3 h-3 text-amber-600" />
+                              <span className="font-extrabold text-amber-950 text-xs sm:text-sm">
+                                {entry.cpm}
+                              </span>
+                              <span className="text-[10px] text-amber-800 font-bold">타/분</span>
+                            </div>
+
+                            <div className="text-[11px] font-bold">
+                              {entry.typos === 0 ? (
+                                <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                  오타0
+                                </span>
+                              ) : (
+                                <span className="text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200">
+                                  오타{entry.typos}
+                                </span>
+                              )}
+                            </div>
+
+                            <span className="text-[10px] sm:text-[11px] text-amber-800/60 font-medium hidden sm:flex items-center gap-0.5">
+                              <Calendar className="w-2.5 h-2.5 text-amber-600" />
+                              {entry.date}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 15 Food Full-Course Feast Preview */}
+            <div className="bg-amber-50/60 rounded-2xl border border-amber-200 p-4">
+              <div className="flex items-center justify-between text-xs font-bold text-amber-950 mb-3 font-['Jua',sans-serif]">
+                <span>내가 완성한 15가지 만화 음식 풀코스 만찬</span>
+                <span className="text-amber-800/60">15개 수집 완료</span>
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+                {collectedWords.map((record, i) => (
+                  <div
+                    key={i}
+                    className="w-10 h-10 rounded-xl bg-white border border-amber-200 flex items-center justify-center shadow-2xs hover:scale-125 transition-transform"
+                    title={`${record.word.name} (${record.cpm}타, 오타: ${record.typoCount}회)`}
+                  >
+                    <FoodIllustration id={record.word.id} name={record.word.name} size="sm" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal */}
+            {isHallOfFameOpen && (
+              <RankingBoardModal
+                onClose={() => setIsHallOfFameOpen(false)}
+                highlightRecord={savedRecord}
+                onClearRankings={() => {
+                  setSavedRecord(null);
+                  setIsSaved(false);
+                  setRefreshTrigger((prev) => prev + 1);
+                }}
+              />
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 14. ROOT APP COMPONENT
+    // ==========================================
+    function App() {
+      const [currentStage, setCurrentStage] = useState(1);
+      const [wordIndexInStage, setWordIndexInStage] = useState(0);
+      const [collectedWords, setCollectedWords] = useState([]);
+      const [totalScore, setTotalScore] = useState(0);
+      const [gameState, setGameState] = useState('PLAYING');
+      const [isMuted, setIsMuted] = useState(false);
+      const [isBgmActive, setIsBgmActive] = useState(true);
+      const [isRankingOpen, setIsRankingOpen] = useState(false);
+      const [liveCpm, setLiveCpm] = useState(0);
+      const [liveCurrentWordTypos, setLiveCurrentWordTypos] = useState(0);
+      const [liveCurrentWordStrokes, setLiveCurrentWordStrokes] = useState(0);
+      const [totalCompletedTypos, setTotalCompletedTypos] = useState(0);
+      const [peakCpm, setPeakCpm] = useState(0);
+      const [elapsedSeconds, setElapsedSeconds] = useState(0);
+      const [gameStartTime, setGameStartTime] = useState(null);
+      const [sessionFoods, setSessionFoods] = useState(() => generateGameSessionFoods());
+      const lastCompletedKeyRef = useRef(null);
+
+      const currentStageWords = useMemo(
+        () => sessionFoods.filter((w) => w.stage === currentStage),
+        [sessionFoods, currentStage]
+      );
+      const currentWord = currentStageWords[wordIndexInStage] || currentStageWords[0];
+
+      const totalKeystrokes = useMemo(() => {
+        const completedStrokes = collectedWords.reduce((acc, rec) => acc + rec.word.strokeCount, 0);
+        return completedStrokes + liveCurrentWordStrokes;
+      }, [collectedWords, liveCurrentWordStrokes]);
+
+      const totalTypoCount = useMemo(() => {
+        return totalCompletedTypos + liveCurrentWordTypos;
+      }, [totalCompletedTypos, liveCurrentWordTypos]);
+
+      const averageCpm = useMemo(() => {
+        if (collectedWords.length === 0) {
+          return liveCpm;
+        }
+        const totalCompletedStrokes = collectedWords.reduce((acc, rec) => acc + rec.word.strokeCount, 0);
+        const totalTimeSpentSec = collectedWords.reduce((acc, rec) => acc + rec.timeSpentSec, 0);
+        if (totalTimeSpentSec <= 0.1) return 0;
+        const avg = Math.round(totalCompletedStrokes / (totalTimeSpentSec / 60));
+        return Math.min(Math.max(0, avg), 1200);
+      }, [collectedWords, liveCpm]);
+
+      const accuracy = useMemo(() => {
+        return calculateAccuracy(totalKeystrokes, totalTypoCount);
+      }, [totalKeystrokes, totalTypoCount]);
+
+      useEffect(() => {
+        let interval;
+        if (gameState === 'PLAYING') {
+          interval = setInterval(() => {
+            setElapsedSeconds((prev) => prev + 1);
+          }, 1000);
+        }
+        return () => clearInterval(interval);
+      }, [gameState]);
+
+      const handleToggleMute = useCallback(() => {
+        setIsMuted((prev) => {
+          const next = !prev;
+          sound.setMuted(next);
+          return next;
+        });
+      }, []);
+
+      const handleToggleBgm = useCallback(() => {
+        const active = sound.toggleBgm();
+        setIsBgmActive(active);
+      }, []);
+
+      const handleLiveCpmUpdate = useCallback((cpm, currentTypos, currentStrokes) => {
+        setLiveCpm(cpm);
+        setLiveCurrentWordTypos(currentTypos);
+        setLiveCurrentWordStrokes(currentStrokes);
+      }, []);
+
+      const handleWordComplete = useCallback(
+        (word, cpm, durationSec, perfect, wordTypoCount) => {
+          const currentKey = `${currentStage}-${wordIndexInStage}`;
+          if (lastCompletedKeyRef.current === currentKey) {
+            return;
+          }
+          lastCompletedKeyRef.current = currentKey;
+
+          if (!gameStartTime) {
+            setGameStartTime(Date.now());
+          }
+
+          if (perfect) {
+            setTotalScore((prev) => prev + 1);
+          }
+
+          setPeakCpm((prev) => Math.max(prev, cpm));
+          setLiveCpm(cpm);
+          setTotalCompletedTypos((prev) => prev + wordTypoCount);
+          setLiveCurrentWordTypos(0);
+          setLiveCurrentWordStrokes(0);
+
+          const newRecord = {
+            word,
+            stage: currentStage,
+            wordIndex: wordIndexInStage,
+            timeSpentSec: durationSec,
+            cpm,
+            accuracy: perfect ? 100 : calculateAccuracy(word.strokeCount, wordTypoCount),
+            typoCount: wordTypoCount,
+            perfect,
+            timestamp: Date.now(),
+          };
+
+          setCollectedWords((prev) => {
+            const isDuplicate = prev.some(
+              (item) => item.stage === currentStage && item.wordIndex === wordIndexInStage
+            );
+            if (isDuplicate) return prev;
+            return [...prev, newRecord];
+          });
+
+          const nextIndex = wordIndexInStage + 1;
+          if (nextIndex < currentStageWords.length) {
+            setWordIndexInStage(nextIndex);
+          } else {
+            if (currentStage < 5) {
+              setGameState('STAGE_CLEAR');
+            } else {
+              setGameState('ALL_CLEARED');
+            }
+          }
+        },
+        [currentStage, wordIndexInStage, currentStageWords.length, gameStartTime]
+      );
+
+      const handleNextStage = useCallback(() => {
+        lastCompletedKeyRef.current = null;
+        const nextStage = currentStage + 1;
+        setCurrentStage(nextStage);
+        setWordIndexInStage(0);
+        setLiveCurrentWordTypos(0);
+        setLiveCurrentWordStrokes(0);
+        setGameState('PLAYING');
+      }, [currentStage]);
+
+      const handleResetGame = useCallback(() => {
+        lastCompletedKeyRef.current = null;
+        setCurrentStage(1);
+        setWordIndexInStage(0);
+        setCollectedWords([]);
+        setTotalScore(0);
+        setLiveCpm(0);
+        setPeakCpm(0);
+        setLiveCurrentWordTypos(0);
+        setLiveCurrentWordStrokes(0);
+        setTotalCompletedTypos(0);
+        setElapsedSeconds(0);
+        setGameStartTime(null);
+        setSessionFoods(generateGameSessionFoods());
+        setGameState('PLAYING');
+      }, []);
+
+      const handleSelectStage = useCallback((stage) => {
+        lastCompletedKeyRef.current = null;
+        setCurrentStage(stage);
+        setWordIndexInStage(0);
+        setLiveCurrentWordTypos(0);
+        setLiveCurrentWordStrokes(0);
+        setGameState('PLAYING');
+      }, []);
+
+      const currentStageCollected = useMemo(() => {
+        return collectedWords.filter((rec) => rec.stage === currentStage);
+      }, [collectedWords, currentStage]);
+
+      const currentStageScore = useMemo(() => {
+        return currentStageCollected.filter((rec) => rec.perfect).length;
+      }, [currentStageCollected]);
+
+      const currentStageTypos = useMemo(() => {
+        return currentStageCollected.reduce((sum, rec) => sum + rec.typoCount, 0);
+      }, [currentStageCollected]);
+
+      const currentStageAvgCpm = useMemo(() => {
+        if (currentStageCollected.length === 0) return 0;
+        const stageStrokes = currentStageCollected.reduce((acc, rec) => acc + rec.word.strokeCount, 0);
+        const stageTimeSec = currentStageCollected.reduce((acc, rec) => acc + rec.timeSpentSec, 0);
+        if (stageTimeSec <= 0.1) return 0;
+        return Math.round(stageStrokes / (stageTimeSec / 60));
+      }, [currentStageCollected]);
+
+      const fullStats = {
+        score: totalScore,
+        totalWordsCompleted: collectedWords.length,
+        totalKeystrokes,
+        totalTypoCount,
+        currentCpm: liveCpm,
+        averageCpm,
+        peakCpm,
+        accuracy,
+        startTime: gameStartTime,
+        elapsedSeconds,
+      };
+
+      return (
+        <div className="h-screen max-h-screen flex flex-col bg-amber-50/40 text-amber-950 font-['Noto_Sans_KR',sans-serif] overflow-hidden">
+          {/* Header */}
+          <Header
+            currentStage={currentStage}
+            totalScore={totalScore}
+            maxScore={15}
+            isMuted={isMuted}
+            isBgmActive={isBgmActive}
+            onToggleMute={handleToggleMute}
+            onToggleBgm={handleToggleBgm}
+            onResetGame={handleResetGame}
+            onSelectStage={handleSelectStage}
+            onOpenRankings={() => setIsRankingOpen(true)}
+          />
+
+          {/* Main Content Area */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-5 py-2 sm:py-2.5 flex flex-col gap-2 sm:gap-2.5 overflow-hidden min-h-0">
+            <StageProgressBar
+              stage={currentStage}
+              wordIndex={wordIndexInStage}
+              totalWordsInStage={currentStageWords.length}
+              currentCpm={liveCpm}
+              averageCpm={averageCpm}
+              totalKeystrokes={totalKeystrokes}
+              accuracy={accuracy}
+              totalTypos={totalTypoCount}
+              onOpenRankings={() => setIsRankingOpen(true)}
+            />
+
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-3 min-h-0 overflow-hidden">
+              {/* Left: Typing Zone */}
+              <div className="lg:col-span-7 xl:col-span-8 h-full bg-white rounded-2xl border border-amber-200/80 shadow-xs flex flex-col overflow-hidden min-h-0">
+                {currentWord && (
+                  <TypingInput
+                    key={`${currentStage}-${wordIndexInStage}`}
+                    currentWord={currentWord}
+                    gameState={gameState}
+                    onWordComplete={handleWordComplete}
+                    onLiveCpmUpdate={handleLiveCpmUpdate}
+                  />
+                )}
+              </div>
+
+              {/* Right: Disney Collection Tray */}
+              <div className="hidden lg:flex lg:col-span-5 xl:col-span-4 h-full overflow-hidden min-h-0">
+                <CollectedFoodsTray collectedWords={collectedWords} allFoods={sessionFoods} />
+              </div>
+            </div>
+          </main>
+
+          {/* Slim Footer */}
+          <footer className="w-full border-t border-amber-200/50 py-1 px-4 text-center text-[10px] sm:text-[11px] text-amber-900/50 font-medium shrink-0">
+            <span>맛있는 음식 타자 연습 · 5단계 총 15개 디즈니 음식 컬렉션 완성 챌린지</span>
+          </footer>
+
+          {/* Modals */}
+          {gameState === 'STAGE_CLEAR' && (
+            <StageClearModal
+              stage={currentStage}
+              stageWords={currentStageCollected}
+              stageScore={currentStageScore}
+              stageTypos={currentStageTypos}
+              averageCpm={currentStageAvgCpm}
+              onNextStage={handleNextStage}
+            />
+          )}
+
+          {gameState === 'ALL_CLEARED' && (
+            <PraiseStampModal
+              stats={fullStats}
+              collectedWords={collectedWords}
+              onRestart={handleResetGame}
+            />
+          )}
+
+          {isRankingOpen && (
+            <RankingBoardModal onClose={() => setIsRankingOpen(false)} />
+          )}
+        </div>
+      );
+    }
+
+    // Render to DOM
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
